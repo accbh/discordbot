@@ -1,16 +1,17 @@
-//import { EventEmitter } from 'events';
 import { Client, RoleManager, GuildMember, ReactionCollector } from 'discord.js';
 import { Logger, LogLevel, LogLevelValue, ConsoleLogger } from './lib/logger';
+import { token, listeningMessage } from './config.json';
 
 const logger = new ConsoleLogger(LogLevelValue.INFO);
 const client = new Client({ partials: ['MESSAGE', 'USER', 'REACTION'] });
-const listeningMessage = "message_id";
 
 client.on('ready', () => {
 
     logger.log(`Online as ${client.user.tag}`, LogLevel.VERBOSE);
     
 });
+
+// REACTION TO ADD ROLE
 
 client.on('messageReactionAdd', (messageReaction, user) => {
     //let { id } = messageReaction.message; //why { id }
@@ -64,7 +65,15 @@ client.on('messageReactionRemove', (messageReaction, user) => {
         logger.log("Reaction removed but it was not a tick.", LogLevel.INFO)
     }
 
-})
+});
+
+// WELCOME A USER
+
+client.on('guildMemberAdd', member => {
+
+
+
+});
 
 const editRole = (reaction) => {
 
@@ -78,5 +87,5 @@ const editRole = (reaction) => {
 
 }
 
-client.login('token');
+client.login(token);
 
