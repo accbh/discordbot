@@ -2,18 +2,19 @@
 
     Name: logger.ts
     Version: 0.0.1
-    Author: Liam P with **loads** of help from Gavin v. G
+    Author: Liam P, Gavin v. G
     Date: 21/07/2020
+    Description: Logger.
 
 */
 
 export enum LogLevel {
 
-    INFO = "INFO",
-    WARN = "WARN",
-    ERROR = "ERROR",
-    FATAL = "FATAL",
-    VERBOSE = "VERBOSE"
+    INFO = 'INFO',
+    WARN = 'WARN',
+    ERROR = 'ERROR',
+    FATAL = 'FATAL',
+    VERBOSE = 'VERBOSE'
 
 }
 
@@ -43,7 +44,7 @@ export class ConsoleLogger implements Logger {
 
         if (LogLevelValue[level] >= this.state) {
 
-            console.log(`${new Date().toISOString()}  ${level} >> ${message}`)
+            console.log(`${new Date().toISOString()}  ${level} >> ${message}`);
 
         }
 
