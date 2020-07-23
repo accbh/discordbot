@@ -9,4 +9,4 @@ Running the Discord bot requires the creation of a config file. The config file 
 
 }
 ```
-Running the bot requires the *.ts files to be converted into *.js files. This is done by running the command: <br>```npx -ts-node index.ts```<br>
+Running the bot requires the *.ts files to be converted into *.js files. This is done by running the command: <br>```npx ts-node index.ts```<br>
