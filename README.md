@@ -5,7 +5,8 @@ Running the Discord bot requires the creation of a config file. The config file 
 {
 
     "token": "",
-    "listeningMessage": ""
+    "listeningMessage": "",
+    "prefix": ""
 
 }
 ```
