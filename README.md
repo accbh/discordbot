@@ -13,4 +13,5 @@ Running the Discord bot requires the creation of a config file. The config file 
     
 }
 ```
-Running the bot is done by running the command: <br>```npx ts-node index.ts```<br>
+## Running
+Run the bot using ```npm run start:dev``` or ```npm run start:dev```<br>
