@@ -10,7 +10,12 @@
 
 import { Client, Message, User, PartialUser } from 'discord.js';
 import { Logger, LogLevel, LogLevelValue, ConsoleLogger } from './lib/logger';
-import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from './config.json';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+//import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
+
+const configContent = readFileSync(join(__dirname, '../config.json')).toString();
+const { token, listeningMessage, prefix, roleName, welcomeMsg, developers } = JSON.parse(configContent);
 
 const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
 const client = new Client({ partials: ['MESSAGE', 'USER', 'REACTION'] });
