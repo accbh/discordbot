@@ -11,7 +11,7 @@
 import { Client, Message, User, PartialUser } from 'discord.js';
 import { Logger, LogLevel, LogLevelValue, ConsoleLogger } from './lib/logger';
 import { readFileSync } from 'fs';
-import { join } from 'path'
+import { join } from 'path';
 //import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
 
 const configContent = readFileSync(join(__dirname, '../config.json')).toString();
