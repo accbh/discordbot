@@ -2,8 +2,8 @@
 
     Name: index.ts
     Version: 1.0.1
-    Author: Liam P, Gavin v. G
-    Date: 21/07/2020
+    Author: Liam P, Gavin v. G, Harrison D.
+    Date: 04/09/2020
     Description: Main bot code. Will handle commands, reactions and users joining the server.
 
 **/
@@ -12,7 +12,7 @@ import { Client, Message, User, PartialUser, GuildMember, MessageEmbed } from 'd
 import { Logger, LogLevel, LogLevelValue, ConsoleLogger } from './lib/logger';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { ATCRatings } from './lib/ratings'
+import { ATCRatings, PilotRATINGS } from './lib/ratings'
 import axios from 'axios';
 //import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
 
@@ -195,11 +195,13 @@ client.on('message', (msg: Message) => {
                         const embed = new MessageEmbed()
                         .setAuthor(`${mention.nickname ? mention.nickname : mention.user.username}`, mention.user.avatarURL())
                         .setDescription(`
-                        CID: **${data["id"]}**
+                        CID: **${data["id"]} (${data["name_first"] + ' ' + data["name_last"]})**
                         vACC: **${vacc}**
                         Reg Date: **${reg_date}**
-                        Rating: **${ATCRatings[data["rating"]]}**
+                        Controller Rating: **${ATCRatings[data["rating"]]}**
+                        Pilot Rating: **${PilotRATINGS["P" + data["pilotrating"]]}** 
                         `)
+                        // We add a p cause idk what to do lmao
                         msg.channel.send(embed);
                         logger.log(`Role that we checked for was in the user's role array, VATSIMData has been given!`, LogLevel.INFO)
                 });
