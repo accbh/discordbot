@@ -14,4 +14,4 @@ Running the Discord bot requires the creation of a config file. The config file 
 }
 ```
 ## Running
-Run the bot using ```npm run start:dev``` or ```npm run start:dev```<br>
+Run the bot using ```npm start``` or ```npm run start:dev```<br>

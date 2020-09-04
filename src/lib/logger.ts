@@ -8,6 +8,8 @@
 
 */
 
+//import { MessageEmbed } from "discord.js";
+
 export enum LogLevel {
 
     INFO = 'INFO',
@@ -50,6 +52,17 @@ export class ConsoleLogger implements Logger {
 
         return this;
 
+    }
+
+    submitTraining(cid: string, date: Date, note: string, level: LogLevel): this { //It's just going to get the info and log to a specific channel
+        if (LogLevelValue[level] >= this.state) {
+            //const embed = new MessageEmbed()
+
+            //console.log(`${new Date().toISOString()}  ${level} >> ${message}`);
+
+        }
+
+        return this;
     }
 
 }
