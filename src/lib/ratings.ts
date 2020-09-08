@@ -25,11 +25,11 @@ export enum ATCRatings {
 }
 
 export enum PilotRATINGS {
-    P0 = "No Training",
-    P1 = "Online Pilot",
-    P2 =  "Flight Fundamentals",
-    P3 = "VFR Pilot",
-    P4 = "IFR Pilot",
-    P5 = "Advanced IFR Pilot",
-    P9 = "Pilot Flight Instructor"
+    P0 = 'No Training',
+    P1 = 'Online Pilot',
+    P2 =  'Flight Fundamentals',
+    P3 = 'VFR Pilot',
+    P4 = 'IFR Pilot',
+    P5 = 'Advanced IFR Pilot',
+    P9 = 'Pilot Flight Instructor'
 }

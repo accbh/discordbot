@@ -3,7 +3,7 @@
       "resolveJsonModule": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
-      "lib": ["es7"],
+      "lib": ["es7", "DOM"],
       "module": "commonjs",
       "noUnusedLocals": true,
       "noUnusedParameters": false,

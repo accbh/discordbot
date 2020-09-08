@@ -12,13 +12,13 @@ import { Client, Message, User, PartialUser, GuildMember, MessageEmbed, MessageR
 import { Logger, LogLevel, LogLevelValue, ConsoleLogger } from './lib/logger';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { ATCRatings, PilotRATINGS } from './lib/ratings'
+import { ATCRatings, PilotRATINGS } from './lib/ratings';
 import moment from 'moment';
 import axios from 'axios';
 //import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
 
 const configContent = readFileSync(join(__dirname, '../config.json')).toString();
-const logChannel = "753001880812257373";
+const logChannel = '753001880812257373';
 const { token, listeningMessage, prefix, roleName, welcomeMsg, developers } = JSON.parse(configContent);
 
 const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
@@ -59,12 +59,12 @@ client.on('messageReactionAdd', async(messageReaction, user) => {
         logger.log('Reaction added but it was not a tick.', LogLevel.INFO);
     }
 
-    if(messageReaction.emoji.name === '🗒️' && !user.bot) {
-        if(messageReaction.message.channel.id == '753001396030406706') {
+    if (messageReaction.emoji.name === '🗒️' && !user.bot) {
+        if (messageReaction.message.channel.id === '753001396030406706') {
             try {
                 giveTraining(user, messageReaction);
-            } catch(err) {
-                logger.log("Training unsuccessful!", LogLevel.ERROR)
+            } catch (err) {
+                logger.log('Training unsuccessful!', LogLevel.ERROR);
             }
         }
     }
@@ -119,61 +119,61 @@ const extractMessageProps = (message: Message, user: User | PartialUser, roleNam
 
 const parseUserCID = (user: GuildMember) => {
     const username = user.nickname ? user.nickname : user.user.username;
-    const cid = username.substring(username.length - 7)
+    const cid = username.substring(username.length - 7);
     return cid;
 };
 
-const giveTraining = async (reactionUser: User | PartialUser, reaction: MessageReaction) => {
+const giveTraining = async(reactionUser: User | PartialUser, reaction: MessageReaction) => {
     let embed = new MessageEmbed()
     .setAuthor('Thanks for requesting!', reactionUser.avatarURL())
     .setDescription(`
     To request your training, please enter the date you would like this training.
     Format: **DD/MM/YY**
-    `)
+    `);
 let filter = m => m.content.length > 0;
 let answers = [];
-const member = reaction.message.guild.members.cache.get(reactionUser.id)
+const member = reaction.message.guild.members.cache.get(reactionUser.id);
 const memberCID = parseUserCID(member);
 
-    await reactionUser.send(embed)
+    await reactionUser.send(embed);
     await reactionUser.dmChannel.awaitMessages(filter, { max: 1, time: 600000 * 3, errors: ['time'] })
     .then(async collect => {
-        answers.push({time: collect.first().content})
-        embed.setAuthor('Okay, we\'ve received that!', reactionUser.avatarURL())
+        answers.push({time: collect.first().content});
+        embed.setAuthor('Okay, we\'ve received that!', reactionUser.avatarURL());
         embed.setDescription(`
         If needed, please specify a note for the instructor.
         If not, please specific \`None\`
-        `)
+        `);
         await reactionUser.send(embed);
         await reactionUser.dmChannel.awaitMessages(filter, { max: 1, time: 600000 * 3, errors: ['time'] })
         .then(async collected => {
-            answers.push({note: collected.first().content})
-            embed.setAuthor('Thanks!', reactionUser.avatarURL())
+            answers.push({note: collected.first().content});
+            embed.setAuthor('Thanks!', reactionUser.avatarURL());
             embed.setDescription(`
                 We have now sent that over to the instructors!
                 **Sit back and relax, whilst we sort something out!**
-            `)
+            `);
             await reactionUser.send(embed);
             const note = await answers[1].note.length > 0 ? answers[1].note : 'None';
             const date = await moment(answers[0].time, 'DD/MM/YYYY', true).isValid();
 
-            if(date) {
+            if (date) {
             await getVATSIMUser(member).then(async data => {
-            embed.setAuthor('New Training Request!', reactionUser.avatarURL())
+            embed.setAuthor('New Training Request!', reactionUser.avatarURL());
             embed.setDescription(`
             **${member.user.username} (${memberCID})** has requested training.
             Date: **${answers[0].time}**
             Note: **${note}**
-            Rating: **${ATCRatings[data["rating"]]}**
-            `)
+            Rating: **${ATCRatings[data['rating']]}**
+            `);
             await (client.channels.cache.get(logChannel) as TextChannel).send(embed);
             });
         } else {
-            logger.log("Date is incorrect for the user!", LogLevel.INFO);
-        };
+            logger.log('Date is incorrect for the user!', LogLevel.INFO);
+        }
 
-        })
-    })
+        });
+    });
     
 
 logger.log(reactionUser.username, LogLevel.INFO);
@@ -181,22 +181,22 @@ logger.log(reactionUser.username, LogLevel.INFO);
 
 const getVATSIMUser = (user: GuildMember) => {
     const cid = parseUserCID(user);
-    const obj = axios.get("https://api.vatsim.net/api/ratings/" + cid)
+    const obj = axios.get('https://api.vatsim.net/api/ratings/' + cid)
     .then(res => {
-        if(res.status == 200) {
+        if (res.status === 200) {
             return res.data;
         } else {
             return {
-                error: "Not working!"
+                error: 'Not working!'
             };
         }
     }).catch(err => {
-        if(err.response.status == 404) {
-            logger.log("Error with getting VATSIM User Data (404)", LogLevel.ERROR);
+        if (err.response.status === 404) {
+            logger.log('Error with getting VATSIM User Data (404)', LogLevel.ERROR);
         } else {
-        logger.log("Error with getting VATSIM User Data (N/A)", LogLevel.ERROR);
+        logger.log('Error with getting VATSIM User Data (N/A)', LogLevel.ERROR);
         }
-    })
+    });
     return obj; //Axios is gonna return a promise
 };
 
@@ -230,26 +230,26 @@ client.on('message', (msg: Message) => {
 
 
 
-    if(command === 'check') {
-        const checkArray = ['732920005372411983', '736025391617015919', '710850836313407589']
-        for(const role of checkArray) {
-            if(msg.member.roles.cache.has(role)) {
+    if (command === 'check') {
+        const checkArray = ['732920005372411983', '736025391617015919', '710850836313407589'];
+        for (const role of checkArray) {
+            if (msg.member.roles.cache.has(role)) {
                 const mention = msg.mentions.members.first();
                 getVATSIMUser(mention).then(data => {
-                    const reg_date = new Date(data["reg_date"]).toUTCString()
-                    const vacc = data["subdivision"] == 'BHR' ? 'Home (Bahrain/BHR)' : data["subdivision"];
+                    const reg_date = new Date(data['reg_date']).toUTCString();
+                    const vacc = data['subdivision'] === 'BHR' ? 'Home (Bahrain/BHR)' : data['subdivision'];
                         const embed = new MessageEmbed()
                         .setAuthor(`${mention.nickname ? mention.nickname : mention.user.username}`, mention.user.avatarURL())
                         .setDescription(`
-                        CID: **${data["id"]} (${data["name_first"] + ' ' + data["name_last"]})**
+                        CID: **${data['id']} (${data['name_first'] + ' ' + data['name_last']})**
                         vACC: **${vacc}**
                         Reg Date: **${reg_date}**
-                        Controller Rating: **${ATCRatings[data["rating"]]}**
-                        Pilot Rating: **${PilotRATINGS["P" + data["pilotrating"]]}** 
-                        `)
+                        Controller Rating: **${ATCRatings[data['rating']]}**
+                        Pilot Rating: **${PilotRATINGS['P' + data['pilotrating']]}** 
+                        `);
                         // We add a p cause idk what else
                         msg.channel.send(embed);
-                        logger.log(`Role that we checked for was in the user's role array, VATSIM data has been given!`, LogLevel.INFO)
+                        logger.log(`Role that we checked for was in the user's role array, VATSIM data has been given!`, LogLevel.INFO);
                 });
                     break;
             }
