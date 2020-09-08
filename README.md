@@ -6,6 +6,9 @@ Running the Discord bot requires the creation of a config file. The config file 
 
     "token": "bot_token",
     "listeningMessage": "message_to_listen_to",
+    "trainingMessage": "training_message",
+    "trainingMessageChannel": "training_message_channel",
+    "logChannel": "log_channel",
     "prefix": "prefix",
     "roleName": "role_name",
     "welcomeMsg": "Welcome_message",
