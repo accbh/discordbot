@@ -54,17 +54,6 @@ export class ConsoleLogger implements Logger {
 
     }
 
-    submitTraining(cid: string, date: Date, note: string, level: LogLevel): this { //It's just going to get the info and log to a specific channel
-        if (LogLevelValue[level] >= this.state) {
-            //const embed = new MessageEmbed()
-
-            //console.log(`${new Date().toISOString()}  ${level} >> ${message}`);
-
-        }
-
-        return this;
-    }
-
 }
 
 // const logger = new ConsoleLogger(LogLevelValue.INFO);

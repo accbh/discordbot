@@ -8,21 +8,32 @@
 
 **/
 
-import { Client, Message, User, PartialUser, GuildMember, MessageEmbed } from 'discord.js';
+import { Client, Message, User, PartialUser, GuildMember, MessageEmbed, MessageReaction, TextChannel} from 'discord.js';
 import { Logger, LogLevel, LogLevelValue, ConsoleLogger } from './lib/logger';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { ATCRatings, PilotRATINGS } from './lib/ratings'
+import moment from 'moment';
 import axios from 'axios';
 //import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
 
 const configContent = readFileSync(join(__dirname, '../config.json')).toString();
+const logChannel = "735994155171446829";
 const { token, listeningMessage, prefix, roleName, welcomeMsg, developers } = JSON.parse(configContent);
 
 const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
 const client = new Client({ partials: ['MESSAGE', 'USER', 'REACTION'] });
 
 client.on('ready', () => {
+    /*
+    const reactChannel = "710845936045391902";
+    (client.channels.cache.get(reactChannel) as TextChannel).messages.fetch({ limit: 1 }).then(async Msg => {
+        const firstMessage = Msg.first();
+        await firstMessage.react(`🗒️`);
+    })
+    */ 
+   //Trying to add in some auto functionality. WIP
+
     logger.log(`Online as ${client.user.tag}`, LogLevel.VERBOSE);  
 });
 
@@ -47,6 +58,17 @@ client.on('messageReactionAdd', async(messageReaction, user) => {
     } else {
         logger.log('Reaction added but it was not a tick.', LogLevel.INFO);
     }
+
+    if(messageReaction.emoji.name === '🗒️' && !user.bot) {
+        if(messageReaction.message.channel.id == '753001396030406706') {
+            try {
+                giveTraining(user, messageReaction);
+            } catch(err) {
+                logger.log("Training unsuccessful!", LogLevel.ERROR)
+            }
+        }
+    }
+
 });
 
 /**
@@ -70,6 +92,7 @@ client.on('messageReactionRemove', async(messageReaction, user) => {
     } else {
         logger.log('Reaction removed but it was not a tick.', LogLevel.INFO);
     }
+
 });
 
 /**
@@ -87,28 +110,73 @@ const extractMessageProps = (message: Message, user: User | PartialUser, roleNam
 
 };
 
+/**
+ * Just grabs the CID from a nickname easier than writing more lines of code.
+ * Format of the nickname needs to be like:
+ * xxx - CID (Just making sure the CID is last I guess, so the client can pick it up correctly)
+ * @param user Message that was reacted to.
+ */
+
 const parseUserCID = (user: GuildMember) => {
     const username = user.nickname ? user.nickname : user.user.username;
     const cid = username.substring(username.length - 7)
     return cid;
 };
 
-//its just gonna parse the id from the user's username for safe keeping
-const getTraining = (user: GuildMember, message: Message) => {
-    const msgArray = message.content.split(" ");  
-    const args = msgArray.slice(1);
+const giveTraining = async (reactionUser: User | PartialUser, reaction: MessageReaction) => {
+    let embed = new MessageEmbed()
+    .setAuthor('Thanks for requesting!', reactionUser.avatarURL())
+    .setDescription(`
+    To request your training, please enter the date you would like this training.
+    Format: **DD/MM/YY**
+    `)
+let filter = m => m.content.length > 0;
+let answers = [];
+const member = reaction.message.guild.members.cache.get(reactionUser.id)
+const memberCID = parseUserCID(member);
 
-    const time = args[1]; //could just use the args variable here but im a savage
-    const note = "test"
+    await reactionUser.send(embed)
+    await reactionUser.dmChannel.awaitMessages(filter, { max: 1, time: 600000 * 3, errors: ['time'] })
+    .then(async collect => {
+        answers.push({time: collect.first().content})
+        embed.setAuthor('Okay, we\'ve received that!', reactionUser.avatarURL())
+        embed.setDescription(`
+        If needed, please specify a note for the instructor.
+        If not, please specific \`None\`
+        `)
+        await reactionUser.send(embed);
+        await reactionUser.dmChannel.awaitMessages(filter, { max: 1, time: 600000 * 3, errors: ['time'] })
+        .then(async collected => {
+            answers.push({note: collected.first().content})
+            embed.setAuthor('Thanks!', reactionUser.avatarURL())
+            embed.setDescription(`
+                We have now sent that over to the instructors!
+                **Sit back and relax, whilst we sort something out!**
+            `)
+            await reactionUser.send(embed);
+            const note = await answers[1].note.length > 0 ? answers[1].note : 'None';
+            const date = await moment(answers[0].time, 'DD/MM/YYYY', true).isValid();
 
-const cid = parseUserCID(message.member);
+            if(date) {
+            await getVATSIMUser(member).then(async data => {
+            embed.setAuthor('New Training Request!', reactionUser.avatarURL())
+            embed.setDescription(`
+            **${member.user.username} (${memberCID})** has requested training.
+            Date: **${answers[0].time}**
+            Note: **${note}**
+            Rating: **${ATCRatings[data["rating"]]}**
+            `)
+            await (client.channels.cache.get(logChannel) as TextChannel).send(embed);
+            });
+        } else {
+            logger.log("Date is incorrect for the user!", LogLevel.INFO);
+        };
 
-    return {
-        cid: cid,
-        note: note,
-        time: time,
-        user: user
-    };
+        })
+    })
+    
+
+logger.log(reactionUser.username, LogLevel.INFO);
 };
 
 const getVATSIMUser = (user: GuildMember) => {
@@ -160,29 +228,7 @@ client.on('message', (msg: Message) => {
         logger.log(`Welcome message sent to ${msg.author.username} (${msg.author.id}).`, LogLevel.INFO);
     }
 
-    if(command === 'training') {
-        const { cid, time, note, user } = getTraining(msg.member, msg);
-        const date = new Date(time)
-        const parsedDate = date.toTimeString();
 
-        if(cid && parsedDate && note) {
-            const embed = new MessageEmbed()
-            .setAuthor("Successful request!", msg.author.avatarURL())
-            .setDescription(`
-            Date: **${date}**
-            Note: **${note}**
-            `)
-
-            msg.channel.send(embed);
-
-            logger.log(`Training has been requested by ${cid} (${user.nickname})`, LogLevel.INFO)
-        } else {
-            logger.log(`Some of the data needed for a training request has not been provided!`, LogLevel.WARN)
-        }
-
-        msg.channel.send(cid);
-        logger.log(`Got CID: ${cid}`, LogLevel.INFO)
-    }
 
     if(command === 'check') {
         const checkArray = ['732920005372411983', '736025391617015919', '710850836313407589']
@@ -201,9 +247,9 @@ client.on('message', (msg: Message) => {
                         Controller Rating: **${ATCRatings[data["rating"]]}**
                         Pilot Rating: **${PilotRATINGS["P" + data["pilotrating"]]}** 
                         `)
-                        // We add a p cause idk what to do lmao
+                        // We add a p cause idk what else
                         msg.channel.send(embed);
-                        logger.log(`Role that we checked for was in the user's role array, VATSIMData has been given!`, LogLevel.INFO)
+                        logger.log(`Role that we checked for was in the user's role array, VATSIM data has been given!`, LogLevel.INFO)
                 });
                     break;
             }

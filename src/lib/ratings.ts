@@ -1,3 +1,13 @@
+/*
+
+    Name: Ratings.ts
+    Version: 0.0.1
+    Author: Harrison D.
+    Date: 08/09/20
+    Description: Defenitions for specificially the check command.
+
+*/
+
 export enum ATCRatings {
     SUSPENDED,
     OBSERVER,
