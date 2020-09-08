@@ -1,41 +1,41 @@
 {
-  "name": "accbhbotjs",
-  "version": "1.0.1",
-  "description": "Running the Discord bot requires the creation of a config file. The config file contains settings (for example channels to listen to, messages to listen to and the bot's token).<br><br>Here is an example:\r ```json\r {",
-  "main": "index.js",
-  "files": [
-    "dist/**/*",
-    ".nvmrc"
-  ],
-  "dependencies": {
-    "axios": "^0.20.0",
-    "discord.js": "^12.2.0",
-    "moment": "^2.27.0"
-  },
-  "devDependencies": {
-    "@types/node": "^14.0.24",
-    "ts-node": "^8.10.2",
-    "tslint": "6.1.2",
-    "tslint-config-security": "1.16.0",
-    "typescript": "3.9.7"
-  },
-  "scripts": {
-    "start": "npm run start:dev",
-    "start:dev": "npx ts-node ./src/index.ts",
-    "start:prod": "node ./dist/index.js",
-    "lint": "npx tslint --project ./",
-    "lint:fix": "npm run lint -- --fix",
-    "clean": "rm -rf ./dist",
-    "build": "npm run clean && npx tsc"
-  },
-  "author": "",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/accbh/discordbot.git"
-  },
-  "bugs": {
-    "url": "https://github.com/accbh/discordbot/issues"
-  },
-  "homepage": "https://github.com/accbh/discordbot#readme"
+    "name": "accbhbotjs",
+    "version": "1.1.0",
+    "description": "Running the Discord bot requires the creation of a config file. The config file contains settings (for example channels to listen to, messages to listen to and the bot's token).<br><br>Here is an example:\r ```json\r {",
+    "main": "index.js",
+    "files": [
+        "dist/**/*",
+        ".nvmrc"
+    ],
+    "dependencies": {
+        "axios": "^0.20.0",
+        "discord.js": "^12.2.0",
+        "moment": "^2.27.0"
+    },
+    "devDependencies": {
+        "@types/node": "^14.0.24",
+        "ts-node": "^8.10.2",
+        "tslint": "6.1.2",
+        "tslint-config-security": "1.16.0",
+        "typescript": "3.9.7"
+    },
+    "scripts": {
+        "start": "npm run start:dev",
+        "start:dev": "npx ts-node ./src/index.ts",
+        "start:prod": "node ./dist/index.js",
+        "lint": "npx tslint --project ./",
+        "lint:fix": "npm run lint -- --fix",
+        "clean": "rm -rf ./dist",
+        "build": "npm run clean && npx tsc"
+    },
+    "author": "",
+    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/accbh/discordbot.git"
+    },
+    "bugs": {
+        "url": "https://github.com/accbh/discordbot/issues"
+    },
+    "homepage": "https://github.com/accbh/discordbot#readme"
 }
