@@ -18,7 +18,7 @@ import axios from 'axios';
 //import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
 
 const configContent = readFileSync(join(__dirname, '../config.json')).toString();
-const logChannel = "735994155171446829";
+const logChannel = "753001880812257373";
 const { token, listeningMessage, prefix, roleName, welcomeMsg, developers } = JSON.parse(configContent);
 
 const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
