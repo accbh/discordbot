@@ -1,6 +1,6 @@
 {
     "name": "accbhbotjs",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Running the Discord bot requires the creation of a config file. The config file contains settings (for example channels to listen to, messages to listen to and the bot's token).<br><br>Here is an example:\r ```json\r {",
     "main": "index.js",
     "files": [

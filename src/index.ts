@@ -18,23 +18,23 @@ import axios from 'axios';
 //import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
 
 const configContent = readFileSync(join(__dirname, '../config.json')).toString();
-const logChannel = '753001880812257373';
-const { token, listeningMessage, prefix, roleName, welcomeMsg, developers } = JSON.parse(configContent);
+const { token, listeningMessage, prefix, roleName, welcomeMsg, developers, logChannel, trainingMessageChannel } = JSON.parse(configContent);
 
 const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
 const client = new Client({ partials: ['MESSAGE', 'USER', 'REACTION'] });
 
 client.on('ready', () => {
     /*
-    const reactChannel = "710845936045391902";
+    const reactChannel = "trainingMessageChannel"; //pulled from json
     (client.channels.cache.get(reactChannel) as TextChannel).messages.fetch({ limit: 1 }).then(async Msg => {
         const firstMessage = Msg.first();
         await firstMessage.react(`🗒️`);
     })
     */ 
    //Trying to add in some auto functionality. WIP
+   //bot will remove the reaction once the user gets a private message
 
-    logger.log(`Online as ${client.user.tag}`, LogLevel.VERBOSE);  
+    logger.log(`Online as ${client.user.tag}`, LogLevel.VERBOSE);
 });
 
 /**
@@ -42,7 +42,7 @@ client.on('ready', () => {
  */
 client.on('messageReactionAdd', async(messageReaction, user) => {
 
-    if (messageReaction.emoji.name === '✅') {
+    if (messageReaction.emoji.name === '✅' && !user.bot) {
 
         if (messageReaction.message.id === listeningMessage) {
             
@@ -55,18 +55,18 @@ client.on('messageReactionAdd', async(messageReaction, user) => {
             }  
 
         } 
-    } else {
-        logger.log('Reaction added but it was not a tick.', LogLevel.INFO);
-    }
-
-    if (messageReaction.emoji.name === '🗒️' && !user.bot) {
-        if (messageReaction.message.channel.id === '753001396030406706') {
+    } else if (messageReaction.emoji.name === '🗒️' && !user.bot) {
+        if (messageReaction.message.channel.id === trainingMessageChannel) {
             try {
                 giveTraining(user, messageReaction);
+                messageReaction.message.reactions.removeAll().catch(error => logger.log(`Error removing reactions to message ${messageReaction.message.id}: ${error}`, LogLevel.ERROR));
+                logger.log(`Training requested by ${user.username} (${user.id})`, LogLevel.INFO);
             } catch (err) {
-                logger.log('Training unsuccessful!', LogLevel.ERROR);
+                logger.log(`Training unsuccessful for ${user.username} (${user.id})`, LogLevel.ERROR);
             }
         }
+    } else {
+        logger.log(`Reaction added to message with ID ${messageReaction.message.channel.id} by ${user.username} (${user.id}) but it was not a tick or training request.`, LogLevel.INFO);
     }
 
 });
@@ -90,7 +90,7 @@ client.on('messageReactionRemove', async(messageReaction, user) => {
 
         }
     } else {
-        logger.log('Reaction removed but it was not a tick.', LogLevel.INFO);
+        logger.log(`Reaction removed from message with ID ${messageReaction.message.channel.id} by ${user.username} (${user.id}) but it was not a tick.`, LogLevel.INFO);
     }
 
 });
@@ -128,12 +128,12 @@ const giveTraining = async(reactionUser: User | PartialUser, reaction: MessageRe
     .setAuthor('Thanks for requesting!', reactionUser.avatarURL())
     .setDescription(`
     To request your training, please enter the date you would like this training.
-    Format: **DD/MM/YY**
+    Format: **DD/MM/YYYY**
     `);
-let filter = m => m.content.length > 0;
-let answers = [];
-const member = reaction.message.guild.members.cache.get(reactionUser.id);
-const memberCID = parseUserCID(member);
+    let filter = m => m.content.length > 0;
+    let answers = [];
+    const member = reaction.message.guild.members.cache.get(reactionUser.id);
+    const memberCID = parseUserCID(member);
 
     await reactionUser.send(embed);
     await reactionUser.dmChannel.awaitMessages(filter, { max: 1, time: 600000 * 3, errors: ['time'] })
@@ -176,7 +176,7 @@ const memberCID = parseUserCID(member);
     });
     
 
-logger.log(reactionUser.username, LogLevel.INFO);
+// logger.log(reactionUser.username, LogLevel.INFO);
 };
 
 const getVATSIMUser = (user: GuildMember) => {
@@ -231,7 +231,7 @@ client.on('message', (msg: Message) => {
 
 
     if (command === 'check') {
-        const checkArray = ['732920005372411983', '736025391617015919', '710850836313407589'];
+        const checkArray = developers;
         for (const role of checkArray) {
             if (msg.member.roles.cache.has(role)) {
                 const mention = msg.mentions.members.first();
