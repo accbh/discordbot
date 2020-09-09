@@ -232,8 +232,8 @@ client.on('message', (msg: Message) => {
 
     if (command === 'check') {
         const checkArray = developers;
-        for (const role of checkArray) {
-            if (msg.member.roles.cache.has(role)) {
+        for (const user of checkArray) {
+            if (msg.guild.members.cache.has(user)) {
                 const mention = msg.mentions.members.first();
                 getVATSIMUser(mention).then(data => {
                     const reg_date = new Date(data['reg_date']).toUTCString();
