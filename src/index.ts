@@ -61,7 +61,7 @@ client.on('messageReactionAdd', async(messageReaction, user) => {
             try {
                 giveTraining(user, messageReaction);
                 messageReaction.message.reactions.removeAll().catch(error => logger.log(`Error removing reactions to message ${messageReaction.message.id}: ${error}`, LogLevel.ERROR));
-                await messageReaction.message.react('🗒️')
+                await messageReaction.message.react('🗒️');
                 logger.log(`Training requested by ${user.username} (${user.id})`, LogLevel.INFO);
             } catch (err) {
                 logger.log(`Training unsuccessful for ${user.username} (${user.id})`, LogLevel.ERROR);
@@ -214,7 +214,7 @@ client.on('guildMemberAdd', member => {
 });
 
 /**
- * Developer version for sending a welcome message. Will fire if a developer sends the command ¬testwelcome.
+ * Handles commands
  */
 client.on('message', (msg: Message) => {
 
@@ -257,8 +257,8 @@ client.on('message', (msg: Message) => {
                 });
                     break;
             } else {
-                msg.channel.send(":x: - User perms not found!")
-                logger.log("User ran check command but did not have correct perms!", LogLevel.ERROR);
+                msg.channel.send(':x: - User perms not found!');
+                logger.log('User ran check command but did not have correct perms!', LogLevel.ERROR);
             }
         }
         
