@@ -18,7 +18,8 @@ import axios from 'axios';
 //import { token, listeningMessage, prefix, roleName, welcomeMsg, developers } from '../config.json';
 
 const configContent = readFileSync(join(__dirname, '../config.json')).toString();
-const { token, listeningMessage, prefix, roleName, welcomeMsg, developers, logChannel, trainingMessageChannel } = JSON.parse(configContent);
+let url = 'https://www.google.com/calendar/render?action=TEMPLATE&text=Bahrain+vACC+Training&details=Training+Session+-+Generated+by+Jarvis&dates=';
+let { token, listeningMessage, prefix, roleName, welcomeMsg, developers, logChannel, trainingMessageChannel } = JSON.parse(configContent);
 
 const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
 const client = new Client({ partials: ['MESSAGE', 'USER', 'REACTION'] });
@@ -56,10 +57,11 @@ client.on('messageReactionAdd', async(messageReaction, user) => {
 
         } 
     } else if (messageReaction.emoji.name === '🗒️' && !user.bot) {
-        if (messageReaction.message.channel.id === trainingMessageChannel) {
+        if (messageReaction.message.channel.id === trainingMessageChannel || '710845936045391902') {
             try {
                 giveTraining(user, messageReaction);
                 messageReaction.message.reactions.removeAll().catch(error => logger.log(`Error removing reactions to message ${messageReaction.message.id}: ${error}`, LogLevel.ERROR));
+                await messageReaction.message.react('🗒️')
                 logger.log(`Training requested by ${user.username} (${user.id})`, LogLevel.INFO);
             } catch (err) {
                 logger.log(`Training unsuccessful for ${user.username} (${user.id})`, LogLevel.ERROR);
@@ -165,6 +167,8 @@ const giveTraining = async(reactionUser: User | PartialUser, reaction: MessageRe
             Date: **${answers[0].time}**
             Note: **${note}**
             Rating: **${ATCRatings[data['rating']]}**
+
+            Add to Google Calendar Here: **[Here](${url + answers[0].time.split('/')[2] + answers[0].time.split('/')[1] + answers[0].time.split('/')[0] + 'T100000Z%2F' +  answers[0].time.split('/')[2] + answers[0].time.split('/')[1] + answers[0].time.split('/')[0] + 'T220000Z'})**
             `);
             await (client.channels.cache.get(logChannel) as TextChannel).send(embed);
             });
@@ -252,6 +256,9 @@ client.on('message', (msg: Message) => {
                         logger.log(`Role that we checked for was in the user's role array, VATSIM data has been given!`, LogLevel.INFO);
                 });
                     break;
+            } else {
+                msg.channel.send(":x: - User perms not found!")
+                logger.log("User ran check command but did not have correct perms!", LogLevel.ERROR);
             }
         }
         
