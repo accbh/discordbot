@@ -8,6 +8,7 @@
 
 */
 
+// C2 and I2 no longer used and have been removed
 export enum ATCRatings {
     SUSPENDED,
     OBSERVER,
@@ -15,21 +16,17 @@ export enum ATCRatings {
     S2,
     S3,
     C1,
-    C2,
     C3,
     I1,
-    I2,
     I3,
     SUPERVISOR,
     ADMINISTRATOR
 }
 
-export enum PilotRATINGS {
-    P0 = 'No Training',
-    P1 = 'Online Pilot',
-    P2 =  'Flight Fundamentals',
-    P3 = 'VFR Pilot',
-    P4 = 'IFR Pilot',
-    P5 = 'Advanced IFR Pilot',
-    P9 = 'Pilot Flight Instructor'
+export enum PilotRatings {
+    P0 =  'Basic VATSIM Pilot',
+    P1 = 'Private Pilot License (PPL)',
+    P2 = 'Instrument Rating (IR)',
+    P3 = 'Commerical Multi-Engine License (CMEL)',
+    P4 = 'Airline Transport License (ATPL)'
 }

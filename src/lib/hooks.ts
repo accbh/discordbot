@@ -1,65 +1,63 @@
 import moment from 'moment';
 import { Message, User, PartialUser, Role, GuildMember, MessageReaction, MessageEmbed, TextChannel } from 'discord.js';
 
+
 import { Hook } from './models';
 import { Logger } from './logger';
 import { VatsimApi } from './vatsim';
 import { ATCRatings, PilotRATINGS } from './ratings';
 
-// import { Client, Message, User, PartialUser, GuildMember, MessageEmbed, MessageReaction, TextChannel, ClientEvents } from 'discord.js';
-
-
 export function getHooks(tag: string, listeningMessage: string, trainingMessageChannel: string[], roleName: string, developers: string[], prefix: string, welcomeMsg: string, vatsimApi: VatsimApi, logger: Logger): Hook[] {
     return [{
-        name: 'messageReactionAdd',
-        listener: (messageReaction, user) => {
-            if (messageReaction.emoji.name !== '✅' || user.bot || messageReaction.message.id !== listeningMessage) {
-                return;
-            }
+    //     name: 'messageReactionAdd',
+    //     listener: (messageReaction, user) => {
+    //         if (messageReaction.emoji.name !== '✅' || user.bot || messageReaction.message.id !== listeningMessage) {
+    //             return;
+    //         }
 
-            Promise.resolve()
-                .then(() => extractMessageProps(messageReaction.message, user, roleName))
-                .then(props => props.member.roles.add(props.role))
-                .then(() => {
-                    logger.info(`Role added to ${user.username} (${user.id})`);
-                }, () => {
-                    logger.error(`Role ${roleName} doesn't exist.`);
-                });
-        }
-    }, {
-        name: 'messageReactionAdd',
-        listener: (messageReaction, user) => {
-            if (messageReaction.emoji.name !== '🗒️' || user.bot || messageReaction.message.channel.id !== trainingMessageChannel) {
-                return;
-            }
+    //         Promise.resolve()
+    //             .then(() => extractMessageProps(messageReaction.message, user, roleName))
+    //             .then(props => props.member.roles.add(props.role))
+    //             .then(() => {
+    //                 logger.info(`Role added to ${user.username} (${user.id})`);
+    //             }, () => {
+    //                 logger.error(`Role ${roleName} doesn't exist.`);
+    //             });
+    //     }
+    // }, {
+    //     name: 'messageReactionAdd',
+    //     listener: (messageReaction, user) => {
+    //         if (messageReaction.emoji.name !== '🗒️' || user.bot || messageReaction.message.channel.id !== trainingMessageChannel) {
+    //             return;
+    //         }
 
-            giveTraining(user, messageReaction, vatsimApi)
-                .then(() => messageReaction.message.reactions.removeAll().catch(error => logger.error(`Error removing reactions to message ${messageReaction.message.id}: ${error}`)))
-                .then(() => messageReaction.message.react('🗒️'))
-                .then(() => {
-                    logger.info(`Training requested by ${user.username} (${user.id})`);
-                }, () => {
-                    logger.error(`Training unsuccessful for ${user.username} (${user.id})`);
-                });
-        }
-    }, {
-        name: 'messageReactionRemove',
-        listener: (messageReaction, user) => {
-            if (messageReaction.emoji.name !== '✅' || messageReaction.message.id !== listeningMessage) {
-                //logger.info(`Reaction removed from message with ID ${messageReaction.message.channel.id} by ${user.username} (${user.id}) but it was not a tick, or it was not added to the correct message.`);
-                return;
-            }
+    //         giveTraining(user, messageReaction, vatsimApi)
+    //             .then(() => messageReaction.message.reactions.removeAll().catch(error => logger.error(`Error removing reactions to message ${messageReaction.message.id}: ${error}`)))
+    //             .then(() => messageReaction.message.react('🗒️'))
+    //             .then(() => {
+    //                 logger.info(`Training requested by ${user.username} (${user.id})`);
+    //             }, () => {
+    //                 logger.error(`Training unsuccessful for ${user.username} (${user.id})`);
+    //             });
+    //     }
+    // }, {
+    //     name: 'messageReactionRemove',
+    //     listener: (messageReaction, user) => {
+    //         if (messageReaction.emoji.name !== '✅' || messageReaction.message.id !== listeningMessage) {
+    //             //logger.info(`Reaction removed from message with ID ${messageReaction.message.channel.id} by ${user.username} (${user.id}) but it was not a tick, or it was not added to the correct message.`);
+    //             return;
+    //         }
 
-            Promise.resolve()
-                .then(() => extractMessageProps(messageReaction.message, user, roleName)) 
-                .then(props => props.member.roles.remove(props.role))
-                .then(() => {
-                    logger.info(`Role removed from ${user.username} (${user.id}).`);
-                }, () => {
-                    logger.error(`Role ${roleName} does not exist in server.`);
-                });
-        }
-    }, {
+    //         Promise.resolve()
+    //             .then(() => extractMessageProps(messageReaction.message, user, roleName)) 
+    //             .then(props => props.member.roles.remove(props.role))
+    //             .then(() => {
+    //                 logger.info(`Role removed from ${user.username} (${user.id}).`);
+    //             }, () => {
+    //                 logger.error(`Role ${roleName} does not exist in server.`);
+    //             });
+    //     }
+    // }, {
         name: 'message',
         listener: (msg: Message) => {
             const allowedUsers = developers;
@@ -142,7 +140,7 @@ const parseUserCID = (user: GuildMember): string => {
     return nickname.substring(nickname.length - 7);
 };
 
-const giveTraining = (reactionUser: User | PartialUser, reaction: MessageReaction, vatsimApi: VatsimApi) => {
+const giveTraining = (reactionUser: User | PartialUser, reaction: MessageReaction, vatsimApi: VatsimApi): Promise<void> => {
     let embed = new MessageEmbed()
         .setAuthor('Thanks for your request!', reactionUser.avatarURL())
         .setDescription(`
@@ -155,7 +153,7 @@ const giveTraining = (reactionUser: User | PartialUser, reaction: MessageReactio
     const member = reaction.message.guild.members.cache.get(reactionUser.id);
     const memberCID = parseUserCID(member);
 
-    reactionUser.send(embed)
+    return reactionUser.send(embed)
         .then(() => reactionUser.dmChannel.awaitMessages(filter, { max: 1, time: 600000 * 3, errors: ['time'] }))
         .then(async collect => {
             answers.push({ time: collect.first().content });
@@ -192,7 +190,7 @@ const giveTraining = (reactionUser: User | PartialUser, reaction: MessageReactio
                 return;
             }
 
-            await getVATSIMUser(member)
+            await getVATSIMUser(vatsimApi, member)
                 .then(async data => {
                     embed.setAuthor('New Training Request!', reactionUser.avatarURL())
                         .setDescription(`
