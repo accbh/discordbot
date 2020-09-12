@@ -1,4 +1,6 @@
+import { EventListener } from '../models';
+
 export interface EventHandler {
     supported(...args: any[]): boolean;
-    handle(...args: any[]): Promise<void>;
+    handle: EventListener;
 }

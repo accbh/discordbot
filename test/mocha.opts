@@ -1,0 +1,5 @@
+--require ts-node/register/transpile-only
+--require test/support/setup.ts
+--recursive test/unit/**/*.test.ts
+--reporter spec
+--check-leaks
