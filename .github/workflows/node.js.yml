@@ -23,11 +23,9 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: echo "Starting at `date`"
     - run: npm ci
     - run: npm run build
     - run: npm prune --production
-    - run: echo "Complete at `date`"
 
   test:
     runs-on: ubuntu-latest
@@ -42,7 +40,5 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: echo "Starting at `date`"
     - run: npm ci
     - run: npm run coverage
-    - echo "Complete at `date`"
