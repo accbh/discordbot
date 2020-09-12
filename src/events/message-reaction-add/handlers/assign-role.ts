@@ -1,15 +1,15 @@
-import { Message, User, PartialUser, GuildMember, Role } from 'discord.js';
+import { Message, User, PartialUser, GuildMember, Role, MessageReaction } from 'discord.js';
 import { EventHandler } from '../models';
-import { Logger } from '../../../logger';
+import { Logger } from '../../../lib/logger';
 
 export class AssignRoleHandler implements EventHandler {
     constructor(private readonly roleName: string, private readonly messageId: string, private readonly emojiName: string, private readonly logger: Logger) {}
 
-    supported(messageReaction, user): boolean {
+    supported(messageReaction: MessageReaction, user: User): boolean {
         return messageReaction.emoji.name === this.emojiName && !user.bot && messageReaction.message.id === this.messageId;
     }
 
-    handle(messageReaction, user): Promise<void> {
+    handle(messageReaction: MessageReaction, user: User): Promise<void> {
         return Promise.resolve()
             .then(() => this.extractMessageProps(messageReaction.message, user, this.roleName))
             .then(props => props.member.roles.add(props.role))

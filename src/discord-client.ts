@@ -1,5 +1,5 @@
-import { Client, ClientUser, PartialTypes } from 'discord.js';
-import { Logger } from './logger';
+import { Client, ClientUser, PartialTypes, TextChannel } from 'discord.js';
+import { Logger } from './lib/logger';
 import { Hook } from './models';
 
 export class DiscordClient {
@@ -68,5 +68,9 @@ export class DiscordClient {
     getRunningAsUser(): ClientUser {
         // TODO - Consider throwing errors if the client isn't connected, or not logged in etc
         return this.client?.user;
+    }
+
+    getTextChannel(channelId: string): TextChannel {
+        return this.client.channels.cache.get(channelId) as TextChannel;
     }
 }

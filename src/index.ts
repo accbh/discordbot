@@ -14,14 +14,14 @@ import { join } from 'path';
 
 import { Logger, LogLevelValue, ConsoleLogger } from './lib/logger';
 import { VatsimApi } from './lib/vatsim';
-import { MessageReactionAdd, MessageReactionRemove } from './lib/events';
-import { DiscordClient } from './lib/discord-client';
+import { EventManager as GenericEventManager, GuildMemberAdd, Message, MessageReactionAdd, MessageReactionRemove } from './events';
+import { DiscordClient } from './discord-client';
 
 /******** Config ********/
 const configContent = readFileSync(join(__dirname, '../config.json')).toString();
 let calendarUrl = 'https://www.google.com/calendar/render?action=TEMPLATE&text=Bahrain+vACC+Training&details=Training+Session+-+Generated+by+Jarvis&dates=';
 // TODO - change how config is extracted
-let { token, listeningMessage, prefix, roleName, welcomeMsg, developers, logChannel, requestTrainingMessageId, trainingRequestChannelId } = JSON.parse(configContent);
+let { token, listeningMessage, botMessagePrefix, roleName, welcomeMessage, developers, requestTrainingMessageId, trainingRequestChannelId } = JSON.parse(configContent);
 
 /******** Extras ********/
 const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
@@ -32,23 +32,39 @@ const vatsimApi = new VatsimApi(vatsimBaseUrl, logger);
 
 const discordClient = new DiscordClient(token, ['MESSAGE', 'USER', 'REACTION'], [], logger);
 
+/******** Guild Member Add ********/
+const sendWelcomeMessageEventHandler = new GuildMemberAdd.SendWelcomeMessageHandler(welcomeMessage, logger);
+
+const guildMemberAddEventHandlers = [sendWelcomeMessageEventHandler];
+const guildMemberAddEventManager = new GenericEventManager('guildMemberAdd', guildMemberAddEventHandlers, logger);
+
+/******** Message ********/
+const checkEventHandler = new Message.CheckHandler(developers, vatsimApi, logger);
+const testMessageEventHandler = new Message.TestMessageHandler(welcomeMessage, logger);
+
+const messageEventHandlers = [checkEventHandler, testMessageEventHandler];
+const messageEventManager = new Message.EventManager(messageEventHandlers, botMessagePrefix, developers, logger);
+
 /******** Messsage Reaction Add ********/
 //TODO - Rename the listening message variable, be more specific
 const assignNotificationsRoleHandler = new MessageReactionAdd.AssignRoleHandler(roleName, listeningMessage, '✅', logger);
 const requestTrainingEventHandler = new MessageReactionAdd.RequestTrainingHandler(requestTrainingMessageId, '🗒️', trainingRequestChannelId, discordClient.getTextChannel.bind(discordClient), calendarUrl, vatsimApi, logger);
 
 const messageReactionAddEventHandlers = [assignNotificationsRoleHandler, requestTrainingEventHandler];
-const messageReactionAddEventManager = new MessageReactionAdd.EventManager(messageReactionAddEventHandlers, logger);
+const messageReactionAddEventManager = new GenericEventManager('messageReactionAdd', messageReactionAddEventHandlers, logger);
 
 /******** Messsage Reaction Remove ********/
 const revokeNotificationsRoleHandler = new MessageReactionRemove.RevokeRoleHandler(roleName, listeningMessage, '✅', logger);
 
 const messageReactionRemoveEventHandlers = [revokeNotificationsRoleHandler];
-const messageReactionRemoveEventManager = new MessageReactionRemove.EventManager(messageReactionRemoveEventHandlers, logger);
+const messageReactionRemoveEventManager = new GenericEventManager('messageReactionRemove', messageReactionRemoveEventHandlers, logger);
 
 /******** Add Hooks to DiscordClient ********/
 
-discordClient.addHooks(messageReactionAddEventManager.getHooks())
+discordClient
+    .addHooks(guildMemberAddEventManager.getHooks())
+    .addHooks(messageEventManager.getHooks())
+    .addHooks(messageReactionAddEventManager.getHooks())
     .addHooks(messageReactionRemoveEventManager.getHooks());
 
 /******** Start ********/

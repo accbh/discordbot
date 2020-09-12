@@ -2,9 +2,9 @@ import moment from 'moment';
 import { User, PartialUser, GuildMember, MessageReaction, MessageEmbed, TextChannel } from 'discord.js';
 
 import { EventHandler } from '../models';
-import { Logger } from '../../../logger';
-import { VatsimApi } from '../../../vatsim';
-import { ATCRatings } from '../../../ratings';
+import { Logger } from '../../../lib/logger';
+import { VatsimApi } from '../../../lib/vatsim';
+import { ATCRatings } from '../../../lib/ratings';
 
 export class RequestTrainingHandler implements EventHandler {
     constructor(
@@ -83,7 +83,7 @@ export class RequestTrainingHandler implements EventHandler {
                 }
 
                 //https://www.google.com/calendar/render?action=TEMPLATE&text=Bahrain+vACC+Training&details=Training+Session+-+Generated+by+Jarvis&dates=
-                const clickableUrl = `${this.calendarUrl}${date.format('YYYYMMDD')}T100000Z%2F${date.format('YYYYMMDD')}T220000Z`; ;
+                const clickableUrl = `${this.calendarUrl}${date.format('YYYYMMDD')}T100000Z%2F${date.format('YYYYMMDD')}T220000Z`; 
 
                 return this.getVATSIMUser(this.vatsimApi, member)
                     .then(async data => {
