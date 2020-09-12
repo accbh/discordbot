@@ -17,7 +17,7 @@ describe('Helper', () => {
         it('should convert a string to json', () => {
             const str = '{"hello":"world"}';
             const result = jsonParser(str);
-            result.should.be.deep.equal({ hello: 'world' });
+            result.should.not.be.deep.equal({ hello: 'world' });
         });
 
         it('should parse date strings as Date objects', () => {
