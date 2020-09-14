@@ -11,6 +11,7 @@
         "axios": "^0.20.0",
         "bluebird": "^3.7.2",
         "discord.js": "^12.2.0",
+        "minimist": "^1.2.5",
         "moment": "^2.27.0"
     },
     "devDependencies": {
@@ -38,7 +39,7 @@
     "scripts": {
         "start": "npm run start:dev",
         "start:dev": "npx ts-node ./src/index.ts",
-        "start:prod": "node ./dist/index.js",
+        "start:prod": "npx node ./dist/index.js",
         "clean": "rm -rf ./dist",
         "build": "npm run clean && npx tsc",
         "coverage": "npx nyc npx mocha",
