@@ -1,13 +1,3 @@
-/**
-
-    Name: index.ts
-    Version: 2.0.0
-    Author: Liam P, Gavin v. G, Harrison D.
-    Date: 11/09/2020
-    Description: Bot index, will compose all the parts we need and start/stop the process.
-
-**/
-
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -31,7 +21,7 @@ if (config.help) {
 
 // -----------------------------------------------------
 // Additional Resources
-const logger: Logger = new ConsoleLogger(LogLevelValue.INFO);
+const logger: Logger = new ConsoleLogger(LogLevelValue[config.loglevel.toUpperCase()]);
 const vatsimBaseUrl = 'https://api.vatsim.net';
 const vatsimApi = new VatsimApi(vatsimBaseUrl, logger);
 
@@ -49,22 +39,22 @@ const guildMemberAddEventManager = new GenericEventManager('guildMemberAdd', gui
 // -----------------------------------------------------
 // Message
 const checkEventHandler = new Message.CheckHandler(config.developerIds, vatsimApi, logger);
-const testMessageEventHandler = new Message.TestMessageHandler(config.newMemberWelcomeMessage, logger);
+const testMessageEventHandler = new Message.TestMessageHandler(config.developerIds, config.newMemberWelcomeMessage, logger);
 
 const messageEventHandlers = [checkEventHandler, testMessageEventHandler];
-const messageEventManager = new Message.EventManager(messageEventHandlers, config.botCommandPrefix, config.developerIds, logger);
+const messageEventManager = new Message.EventManager(messageEventHandlers, config.botCommandPrefix, logger);
 
 // -----------------------------------------------------
 // Message Reaction Add
-const assignNotificationsRoleHandler = new MessageReactionAdd.AssignRoleHandler(config.notificationsRoleName, config.notificationsRoleMessageId, '✅', logger);
-const requestTrainingEventHandler = new MessageReactionAdd.RequestTrainingHandler(config.requestTrainingMessageId, '🗒️', config.trainingRequestChannelId, discordClient.getTextChannel.bind(discordClient), config.calendarUrl, vatsimApi, logger);
+const assignNotificationsRoleHandler = new MessageReactionAdd.AssignRoleHandler(config.notificationRoleName, config.notificationRoleMessageId, '✅', logger);
+const requestTrainingEventHandler = new MessageReactionAdd.RequestTrainingHandler(config.requestTrainingMessageId, '🗒️', config.requestTrainingChannelId, discordClient.getTextChannel.bind(discordClient), config.calendarUrl, vatsimApi, logger);
 
 const messageReactionAddEventHandlers = [assignNotificationsRoleHandler, requestTrainingEventHandler];
 const messageReactionAddEventManager = new GenericEventManager('messageReactionAdd', messageReactionAddEventHandlers, logger);
 
 // -----------------------------------------------------
 // Message Reaction Remove
-const revokeNotificationsRoleHandler = new MessageReactionRemove.RevokeRoleHandler(config.notificationsRoleName, config.notificationsRoleMessageId, '✅', logger);
+const revokeNotificationsRoleHandler = new MessageReactionRemove.RevokeRoleHandler(config.notificationRoleName, config.notificationRoleMessageId, '✅', logger);
 
 const messageReactionRemoveEventHandlers = [revokeNotificationsRoleHandler];
 const messageReactionRemoveEventManager = new GenericEventManager('messageReactionRemove', messageReactionRemoveEventHandlers, logger);

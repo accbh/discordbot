@@ -5,7 +5,7 @@ import { Logger } from '../../../lib/logger';
 export class AssignRoleHandler implements EventHandler {
     constructor(private readonly roleName: string, private readonly messageId: string, private readonly emojiName: string, private readonly logger: Logger) {}
 
-    supported(messageReaction: MessageReaction, user: User): boolean {
+    supported(messageReaction: MessageReaction, user: User, a?: any, b?: any, c?: any): boolean {
         return messageReaction.emoji.name === this.emojiName && !user.bot && messageReaction.message.id === this.messageId;
     }
 

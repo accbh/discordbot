@@ -19,7 +19,7 @@ export class VatsimApi {
         return apiInstance.get(`/api/ratings/${userCid}`)
             .then(res => {
                 if (res.status === 200) {
-                    return res.data.user.nickname;
+                    return res.data;
                 }
 
                 return {

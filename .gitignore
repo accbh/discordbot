@@ -75,3 +75,6 @@ local
 
 # Bot config
 config.json
+
+# scripts
+scripts/

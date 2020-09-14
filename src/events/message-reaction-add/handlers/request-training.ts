@@ -95,7 +95,7 @@ export class RequestTrainingHandler implements EventHandler {
                             Note: **${note}**
                             Rating: **${ATCRatings[data['rating']]}**
                             
-                            Add to Google Calendar Here: **[Here](${clickableUrl})**
+                            Add to Google Calendar **[Here](${clickableUrl})**
                             `,
                             this.getTextChannel(this.trainingRequestChannelId),
                             requestor.avatarURL());

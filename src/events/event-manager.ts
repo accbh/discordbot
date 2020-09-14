@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird';
 import { ClientEvents } from 'discord.js';
 
 import { Hook } from '../models';
@@ -11,14 +12,15 @@ export class EventManager {
         return [{
             name: this.hookName,
             listener: async(...args: any[]) => {
-                const handler = this.handlers.find(handler => handler.supported(args));
+                const handlers = this.handlers.filter(handler => handler.supported.call(handler, ...args));
 
-                if (!handler) {
-                    this.logger.warn('Blah blah, TODO');
+                if (!handlers.length) {
+                    this.logger.warn(`No handlers found able to handle hook '${this.hookName}' with args: ${JSON.stringify(args)}`);
                     return;
                 }
-
-                await handler.handle(args);
+                
+                await Bluebird.map(handlers, handler => handler.handle.call(handler, ...args), { concurrency: 5 })
+                    .catch(error => this.logger.error(error.detailed));
             }
         }];
     }

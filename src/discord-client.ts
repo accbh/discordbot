@@ -62,7 +62,7 @@ export class DiscordClient {
     }
 
     private getExistingHook(hook: Hook): Hook {
-        return this.hooks.find(_hook => _hook === hook || (_hook.name === hook.name && _hook.listener === hook.listener));
+        return this.hooks.find(_hook => _hook === hook || (_hook.name === hook.name && JSON.stringify(_hook.listener) === JSON.stringify(hook.listener)));
     }
 
     getRunningAsUser(): ClientUser {

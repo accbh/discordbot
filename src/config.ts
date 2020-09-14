@@ -15,15 +15,15 @@ export class Config {
 
     newMemberWelcomeMessage?: string;
 
-    notificationsRoleMessageId?: string;
-    notificationsRoleName?: string;
+    notificationRoleMessageId?: string;
+    notificationRoleName?: string;
 
     requestTrainingMessageId?: string;
-    trainingRequestChannelId?: string;
+    requestTrainingChannelId?: string;
     calendarUrl?: string;
     
     static fromArgs(argv: string[], pkg: any): Config {
-        const args: string[] = minimist(argv.slice(2), { string: ['alias'] });
+        const args: string[] = minimist(argv.slice(2), { string: ['notification-role-message-id', 'request-training-message-id', 'request-training-channel-id'] });
         const config = new Config();
 
         config.help = args.hasOwnProperty('help');
@@ -40,11 +40,11 @@ export class Config {
 
         config.newMemberWelcomeMessage = Config.param(args, 'new-member-welcome-message', 'Welcome to the Bahrain vAcc discord server');
 
-        config.notificationsRoleMessageId = Config.param(args, 'notifications-role-message-id');
-        config.notificationsRoleName = Config.param(args, 'notifications-role-name', 'Notifications');
+        config.notificationRoleMessageId = Config.param(args, 'notification-role-message-id');
+        config.notificationRoleName = Config.param(args, 'notification-role-name', 'Notifications');
 
         config.requestTrainingMessageId = Config.param(args, 'request-training-message-id');
-        config.trainingRequestChannelId = Config.param(args, 'traning-request-channel-id');
+        config.requestTrainingChannelId = Config.param(args, 'request-training-channel-id');
         config.calendarUrl = Config.param(args, 'calendar-url', 'https://www.google.com/calendar/render?action=TEMPLATE&text=Bahrain+vACC+Training&details=Training+Session+-+Generated+by+Jarvis&dates=');
 
         return config;
@@ -75,11 +75,11 @@ export class Config {
 
             --new-member-welcome-message=<string>                       The message to send to the a user who joins
             
-            --notifications-role-message-id=<string>                    The id of the message to watch, a reaction will assign the --notifications-role-name to the new member
-            --notifications-role-name=<string>{Notifications}           The name of the role to assign to a user that wants to receive notifications
+            --notification-role-message-id=<string>                     The id of the message to watch, a reaction will assign the --notifications-role-name to the new member
+            --notification-role-name=<string>{Notifications}            The name of the role to assign to a user that wants to receive notifications
 
             --request-training-message-id=<string>                      The id of the message to watch, a reaction will begin a conversation with the user requesting information about when s/he wants training, and then put the request in the --training-request-channel-id channel
-            --training-request-channel-id=<string>                      The id of the channel where requests for training will be published
+            --request-training-channel-id=<string>                      The id of the channel where requests for training will be published
             --calendar-url=<string>                                     The url to use when a training request message is sent to the mentors
 
         `;

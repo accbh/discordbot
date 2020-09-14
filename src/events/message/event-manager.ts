@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird';
 import { Message } from 'discord.js';
 
 import { Hook } from '../../models';
@@ -5,7 +6,7 @@ import { Logger } from '../../lib/logger';
 import { EventHandler } from './models';
 
 export class EventManager {
-    constructor(private readonly handlers: EventHandler[], private readonly messagePrefix: string, private readonly allowedMembers: string[], private readonly logger: Logger) {
+    constructor(private readonly handlers: EventHandler[], private readonly messagePrefix: string, private readonly logger: Logger) {
         // tslint:disable-next-line: tsr-detect-non-literal-regexp
         this.messagePrefixRegex = new RegExp(`^${this.messagePrefix}`, 'ig');
     }
@@ -21,22 +22,18 @@ export class EventManager {
                     return;
                 }
 
-                const authorIsAllowed = this.allowedMembers.includes(message.author.id);
-                if (!authorIsAllowed) {
-                    return;
-                }
-            
                 const args = message.content.replace(this.messagePrefixRegex, '').trim().split(/ +/);
                 const command = args.shift().toLowerCase();
 
-                const handler = this.handlers.find(handler => handler.supported(command, args, message));
+                const handlers = this.handlers.filter(handler => handler.supported(command, args, message));
 
-                if (!handler) {
-                    this.logger.warn('Blah blah, TODO');
+                if (!handlers.length) {
+                    this.logger.warn(`No handlers found able to handle command '${command}'`);
                     return;
                 }
 
-                await handler.handle(command, args, message);
+                await Bluebird.map(handlers, handler => handler.handle(command, args, message), { concurrency: 5 })
+                    .catch(error => this.logger.error(error.detailed));
             }
         }];
     }
