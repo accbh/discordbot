@@ -3,7 +3,7 @@ import * as types from '../../../../src/lib/logger/types';
 import * as ConsoleLogger from '../../../../src/lib/logger/console-logger';
 
 
-describe('EventHandlersModule', () => {
+describe('LoggerModule', () => {
     it('should export the expected resources', () => {
         LoggerModule.should.be.deep.equal({
             ...types,
