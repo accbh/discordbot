@@ -1,19 +1,22 @@
-import sinon, { StubbedInstance, stubInterface, stubObject } from 'ts-sinon';
-import { should } from 'chai';
-import { Message, MessageReaction, User, GuildMember, Role } from 'discord.js';
+import sinon, { stubInterface, StubbedInstance } from 'ts-sinon';
 
-import { RevokeRoleHandler } from '../../../../../src/events/message-reaction-remove';
+import { RequestTrainingHandler } from '../../../../../src/events/message-reaction-add';
+import { VatsimApi } from '../../../../../src/lib/vatsim';
+import { TextChannel, MessageReaction, User } from 'discord.js';
 import { Logger } from '../../../../../src/lib/logger';
-import { ExtractedMessageProps } from '../../../../../src/types';
+import { should } from 'chai';
 
-describe('RevokeRoleHandler', () => {
-    const roleName = 'some-role-name';
-    const messageId = '1234';
+describe('RequestTrainingHandler', () => {
+    const messageId = 'some-message-id';
     const emojiName = 'some-emoji-name';
+    const trainingRequestChannelId = 'some-channel-id';
+    const calendarUrl = '?date=';
 
-    let extractMessageProps: sinon.SinonStub<[Message, User, string], ExtractedMessageProps>;
+    let getTextChannel: sinon.SinonStub<[string], TextChannel>;
+    let vatsimApi: StubbedInstance<VatsimApi>;
     let logger: StubbedInstance<Logger>;
-    let handler: RevokeRoleHandler;
+    
+    let handler: RequestTrainingHandler;
 
     let sandbox: sinon.SinonSandbox;
 
@@ -24,33 +27,41 @@ describe('RevokeRoleHandler', () => {
     beforeEach(() => {
         sandbox.restore();
 
-        extractMessageProps = sinon.stub<[Message, User, string], ExtractedMessageProps>();
+        getTextChannel = sandbox.stub<[string], TextChannel>();
+        vatsimApi = stubInterface<VatsimApi>();
         logger = stubInterface<Logger>();
-        handler = new RevokeRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
+
+        handler = new RequestTrainingHandler(messageId, emojiName, trainingRequestChannelId, getTextChannel, calendarUrl, vatsimApi, logger);
     });
 
     describe('constructor', () => {
-        it('should construct the instance as expected', () => {
+        it('should construct an instance as expected', () => {
             handler.should.be.deep.equal({
-                roleName,
                 messageId,
                 emojiName,
-                extractMessageProps,
+                trainingRequestChannelId,
+                getTextChannel,
+                calendarUrl,
+                vatsimApi,
                 logger
             });
         });
 
-        it('should construct the instance as expected - secondary', () => {
-            const roleName = 'my-role-name';
-            const messageId = 'abc';
-            const emojiName = 'smiley';
-            handler = new RevokeRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
+        it('should construct an instance as expected - secondary', () => {
+            const messageId = 'another-message-id';
+            const emojiName = 'another-emoji-name';
+            const trainingRequestChannelId = 'another-channel-id';
+            const calendarUrl = '?test=true&date=';
 
+            handler = new RequestTrainingHandler(messageId, emojiName, trainingRequestChannelId, getTextChannel, calendarUrl, vatsimApi, logger);
+            
             handler.should.be.deep.equal({
-                roleName,
                 messageId,
                 emojiName,
-                extractMessageProps,
+                trainingRequestChannelId,
+                getTextChannel,
+                calendarUrl,
+                vatsimApi,
                 logger
             });
         });
@@ -158,66 +169,9 @@ describe('RevokeRoleHandler', () => {
         let messageReaction: StubbedInstance<MessageReaction>;
         let user: StubbedInstance<User>;
 
-        let member: StubbedInstance<GuildMember>;
-        let role: StubbedInstance<Role>;
-
-        let removeRoleStub: sinon.SinonStub;
-
         beforeEach(() => {
             messageReaction = stubInterface<MessageReaction>();
             user = stubInterface<User>();
-
-            removeRoleStub = sandbox.stub();
-            member = stubObject<GuildMember>({ roles: { remove: removeRoleStub } } as any as GuildMember);
-            role = stubInterface<Role>();
-
-            extractMessageProps.returns({ member, role });
-        });
-
-        it('should reject with any error thrown by handler.extractMessageProps', () => {
-            const error = new Error('Some fake error');
-            extractMessageProps.throws(error);
-
-            return handler.handle(messageReaction, user)
-                .then(() => {
-                    throw new Error('Expected an error to be thrown but got success');
-                }, err => {
-                    extractMessageProps.should.have.been.calledOnce;
-                    extractMessageProps.should.have.been.calledWithExactly(messageReaction.message, user, roleName);
-
-                    err.should.be.equal(error);
-                });
-        });
-
-        it('should reject with any error rejected by member.roles.remove', () => {
-            const error = new Error('Some fake error');
-            removeRoleStub.rejects(error);
-
-            return handler.handle(messageReaction, user)
-                .then(() => {
-                    throw new Error('Expected an error to be thrown but got success');
-                }, err => {
-                    extractMessageProps.should.have.been.calledOnce;
-                    extractMessageProps.should.have.been.calledWithExactly(messageReaction.message, user, roleName);
-
-                    removeRoleStub.should.have.been.calledOnce;
-                    removeRoleStub.should.have.been.calledWithExactly(role);
-
-                    err.should.be.equal(error);
-                });
-        });
-
-        it('should resolve void once successfully removed role', () => {
-            return handler.handle(messageReaction, user)
-                .then(result => {
-                    extractMessageProps.should.have.been.calledOnce;
-                    extractMessageProps.should.have.been.calledWithExactly(messageReaction.message, user, roleName);
-
-                    removeRoleStub.should.have.been.calledOnce;
-                    removeRoleStub.should.have.been.calledWithExactly(role);
-
-                    should().not.exist(result);
-                });
         });
     });
 });

@@ -1,5 +1,5 @@
 export * from './event-manager';
-export * from './models';
+export * from './types';
 
 export * as GuildMemberAdd from './guild-member-add';
 export * as Message from './message';

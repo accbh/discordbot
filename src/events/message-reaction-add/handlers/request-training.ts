@@ -1,10 +1,11 @@
 import moment from 'moment';
-import { User, PartialUser, GuildMember, MessageReaction, MessageEmbed, TextChannel } from 'discord.js';
+import { User, PartialUser, MessageReaction, TextChannel } from 'discord.js';
 
-import { EventHandler } from '../models';
+import { EventHandler } from '../types';
 import { Logger } from '../../../lib/logger';
 import { VatsimApi } from '../../../lib/vatsim';
-import { ATCRatings } from '../../../lib/ratings';
+import { ATCRatings } from '../../../types';
+import { resetMessageReaction, applyReactionToMessage, extractUserCidFromGuildMember, getVatsimUser, sendMessageToChannel, sendMessageToUser } from '../../../lib/discord-helpers';
 
 export class RequestTrainingHandler implements EventHandler {
     constructor(
@@ -23,30 +24,12 @@ export class RequestTrainingHandler implements EventHandler {
 
     handle(messageReaction, user): Promise<void> {
         return this.giveTraining(user, messageReaction)
-            .then(() => messageReaction.message.reactions.removeAll().catch(error => this.logger.error(`Error removing reactions to message ${messageReaction.message.id}: ${error}`)))
-            .then(() => messageReaction.message.react('🗒️'))
+            .then(() => resetMessageReaction(messageReaction, this.logger))
+            .then(() => applyReactionToMessage(messageReaction, this.emojiName))
             .then(() => {
                 this.logger.info(`Training requested by ${user.username} (${user.id})`);
             }, () => {
-                this.logger.error(`Training unsuccessful for ${user.username} (${user.id})`);
-            });
-    }
-
-    parseUserCID(user: GuildMember): string {
-        const nickname = user?.nickname;
-        if (!nickname) {
-            // TODO - Throw an error or add some early exit code
-            throw Error('Oops');
-        }
-        
-        return nickname.substring(nickname.length - 7);
-    }
-
-    getVATSIMUser(vatsimApi: VatsimApi, user: GuildMember): Promise<any> {
-        return vatsimApi.getApiInstance()
-            .then(apiInstance => {
-                const cid = this.parseUserCID(user);
-                return vatsimApi.getVATSIMUser(apiInstance, cid);
+                this.logger.error(`Training request unsuccessful for ${user.username} (${user.id})`);
             });
     }
 
@@ -54,20 +37,20 @@ export class RequestTrainingHandler implements EventHandler {
     async giveTraining(requestor: User | PartialUser, reaction: MessageReaction): Promise<void> {
         const responseMessageFilter = m => !!m.content.length; // !!0 is falsey 
         const member = reaction.message.guild.members.cache.get(requestor.id);
-        const memberCID = this.parseUserCID(member);
+        const memberCid = extractUserCidFromGuildMember(member);
 
         const answers = [];
     
-        return this.sendMessageToUser('Thanks for your request!', 'Please enter a date that you are available for training.\nFormat: **DD/MM/YYYY**', requestor)
+        return sendMessageToUser('Thanks for your request!', 'Please enter a date that you are available for training.\nFormat: **DD/MM/YYYY**', requestor)
             .then(() => requestor.dmChannel.awaitMessages(responseMessageFilter, { max: 1, time: 1000 * 60 * 30, errors: ['time'] }))
             .then(async collect => {
                 answers.push({ time: collect.first().content });
-                return this.sendMessageToUser('Okay, we\'ve received that!', 'If needed, please specify a note for the instructor.\nIf not, please write \`None\`.', requestor);
+                return sendMessageToUser('Okay, we\'ve received that!', 'If needed, please specify a note for the instructor.\nIf not, please write \`None\`.', requestor);
             })
             .then(() => requestor.dmChannel.awaitMessages(responseMessageFilter, { max: 1, time: 1000 * 60 * 30, errors: ['time'] }))
             .then(collected => {
                 answers.push({ note: collected.first().content });    
-                return this.sendMessageToUser('Thanks!', 'We have now sent that over to the instructors!\n**Sit back and relax whilst we sort something out!**', requestor);
+                return sendMessageToUser('Thanks!', 'We have now sent that over to the instructors!\n**Sit back and relax whilst we sort something out!**', requestor);
             })
             .then(async() => {
                 const note = answers[1].note.length > 0 ? answers[1].note : 'None';
@@ -82,15 +65,13 @@ export class RequestTrainingHandler implements EventHandler {
                     return;
                 }
 
-                //https://www.google.com/calendar/render?action=TEMPLATE&text=Bahrain+vACC+Training&details=Training+Session+-+Generated+by+Jarvis&dates=
                 const clickableUrl = `${this.calendarUrl}${date.format('YYYYMMDD')}T100000Z%2F${date.format('YYYYMMDD')}T220000Z`; 
 
-                return this.getVATSIMUser(this.vatsimApi, member)
+                return getVatsimUser(this.vatsimApi, memberCid)
                     .then(async data => {
-                        
-                        return this.sendMessageToChannel(
+                        return sendMessageToChannel(
                             'New training request!',
-                            `**${member.user.username} (${memberCID})** has requested training.
+                            `**${member.user.username} (${memberCid})** has requested training.
                             Date: **${date.format('DD/MM/YYYY')}**
                             Note: **${note}**
                             Rating: **${ATCRatings[data['rating']]}**
@@ -101,25 +82,6 @@ export class RequestTrainingHandler implements EventHandler {
                             requestor.avatarURL());
                     }); 
             });
-    
-    // logger.log(requestor.username, LogLevel.INFO);
-    }
-
-    private async sendMessageToUser(header: string, message: string, user: User | PartialUser): Promise<void> {
-        // Should we be sending the bot's avatar instead?
-        const embeddedMessage = this.constructEmbeddedMessage(header, message, user.avatarURL());
-        await user.send(embeddedMessage);
-    }
-
-    private async sendMessageToChannel(header: string, message: string, channel: TextChannel, avatarUrl): Promise<void> {
-        const embeddedMessage = this.constructEmbeddedMessage(header, message, avatarUrl);
-        await channel.send(embeddedMessage);
-    }
-
-    private constructEmbeddedMessage(header: string, message: string, avatarUrl: string): MessageEmbed {
-        return new MessageEmbed()
-            .setAuthor(`${header}`, avatarUrl)
-            .setDescription(message);
     }
 
 }

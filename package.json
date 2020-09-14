@@ -27,10 +27,10 @@
         "mockdate": "^3.0.2",
         "nyc": "^14.1.1",
         "pre-commit": "^1.2.2",
-        "sinon": "^7.4.2",
+        "sinon": "^9.0.3",
         "sinon-chai": "^3.3.0",
         "ts-node": "^8.10.2",
-        "ts-sinon": "^1.2.0",
+        "ts-sinon": "^2.0.1",
         "tslint": "6.1.2",
         "tslint-config-security": "1.16.0",
         "typescript": "3.9.7"

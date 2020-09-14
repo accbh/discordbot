@@ -2,18 +2,18 @@ import sinon, { StubbedInstance, stubInterface, stubObject } from 'ts-sinon';
 import { should } from 'chai';
 import { Message, MessageReaction, User, GuildMember, Role } from 'discord.js';
 
-import { RevokeRoleHandler } from '../../../../../src/events/message-reaction-remove';
+import { AssignRoleHandler } from '../../../../../src/events/message-reaction-add';
 import { Logger } from '../../../../../src/lib/logger';
 import { ExtractedMessageProps } from '../../../../../src/types';
 
-describe('RevokeRoleHandler', () => {
+describe('AssignRoleHandler', () => {
     const roleName = 'some-role-name';
     const messageId = '1234';
     const emojiName = 'some-emoji-name';
 
     let extractMessageProps: sinon.SinonStub<[Message, User, string], ExtractedMessageProps>;
     let logger: StubbedInstance<Logger>;
-    let handler: RevokeRoleHandler;
+    let handler: AssignRoleHandler;
 
     let sandbox: sinon.SinonSandbox;
 
@@ -26,7 +26,7 @@ describe('RevokeRoleHandler', () => {
 
         extractMessageProps = sinon.stub<[Message, User, string], ExtractedMessageProps>();
         logger = stubInterface<Logger>();
-        handler = new RevokeRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
+        handler = new AssignRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
     });
 
     describe('constructor', () => {
@@ -44,7 +44,7 @@ describe('RevokeRoleHandler', () => {
             const roleName = 'my-role-name';
             const messageId = 'abc';
             const emojiName = 'smiley';
-            handler = new RevokeRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
+            handler = new AssignRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
 
             handler.should.be.deep.equal({
                 roleName,
@@ -161,14 +161,14 @@ describe('RevokeRoleHandler', () => {
         let member: StubbedInstance<GuildMember>;
         let role: StubbedInstance<Role>;
 
-        let removeRoleStub: sinon.SinonStub;
+        let addRoleStub: sinon.SinonStub;
 
         beforeEach(() => {
             messageReaction = stubInterface<MessageReaction>();
             user = stubInterface<User>();
 
-            removeRoleStub = sandbox.stub();
-            member = stubObject<GuildMember>({ roles: { remove: removeRoleStub } } as any as GuildMember);
+            addRoleStub = sandbox.stub();
+            member = stubObject<GuildMember>({ roles: { add: addRoleStub } } as any as GuildMember);
             role = stubInterface<Role>();
 
             extractMessageProps.returns({ member, role });
@@ -189,9 +189,9 @@ describe('RevokeRoleHandler', () => {
                 });
         });
 
-        it('should reject with any error rejected by member.roles.remove', () => {
+        it('should reject with any error rejected by member.roles.add', () => {
             const error = new Error('Some fake error');
-            removeRoleStub.rejects(error);
+            addRoleStub.rejects(error);
 
             return handler.handle(messageReaction, user)
                 .then(() => {
@@ -200,21 +200,21 @@ describe('RevokeRoleHandler', () => {
                     extractMessageProps.should.have.been.calledOnce;
                     extractMessageProps.should.have.been.calledWithExactly(messageReaction.message, user, roleName);
 
-                    removeRoleStub.should.have.been.calledOnce;
-                    removeRoleStub.should.have.been.calledWithExactly(role);
+                    addRoleStub.should.have.been.calledOnce;
+                    addRoleStub.should.have.been.calledWithExactly(role);
 
                     err.should.be.equal(error);
                 });
         });
 
-        it('should resolve void once successfully removed role', () => {
+        it('should resolve void once successfully added role', () => {
             return handler.handle(messageReaction, user)
                 .then(result => {
                     extractMessageProps.should.have.been.calledOnce;
                     extractMessageProps.should.have.been.calledWithExactly(messageReaction.message, user, roleName);
 
-                    removeRoleStub.should.have.been.calledOnce;
-                    removeRoleStub.should.have.been.calledWithExactly(role);
+                    addRoleStub.should.have.been.calledOnce;
+                    addRoleStub.should.have.been.calledWithExactly(role);
 
                     should().not.exist(result);
                 });

@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 
-import { EventHandler } from '../models';
+import { EventHandler } from '../types';
 import { Logger } from '../../../lib/logger';
 
 export class TestMessageHandler implements EventHandler {

@@ -1,9 +1,9 @@
 import Bluebird from 'bluebird';
 import { Message } from 'discord.js';
 
-import { Hook } from '../../models';
+import { Hook } from '../../types';
 import { Logger } from '../../lib/logger';
-import { EventHandler } from './models';
+import { EventHandler } from './types';
 
 export class EventManager {
     constructor(private readonly handlers: EventHandler[], private readonly messagePrefix: string, private readonly logger: Logger) {

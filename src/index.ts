@@ -46,7 +46,7 @@ const messageEventManager = new Message.EventManager(messageEventHandlers, confi
 
 // -----------------------------------------------------
 // Message Reaction Add
-const assignNotificationsRoleHandler = new MessageReactionAdd.AssignRoleHandler(config.notificationRoleName, config.notificationRoleMessageId, '✅', logger);
+const assignNotificationsRoleHandler = new MessageReactionAdd.AssignRoleHandler(config.notificationRoleName, config.notificationRoleMessageId, '✅', discordClient.extractMessageProps.bind(discordClient), logger);
 const requestTrainingEventHandler = new MessageReactionAdd.RequestTrainingHandler(config.requestTrainingMessageId, '🗒️', config.requestTrainingChannelId, discordClient.getTextChannel.bind(discordClient), config.calendarUrl, vatsimApi, logger);
 
 const messageReactionAddEventHandlers = [assignNotificationsRoleHandler, requestTrainingEventHandler];
@@ -54,7 +54,7 @@ const messageReactionAddEventManager = new GenericEventManager('messageReactionA
 
 // -----------------------------------------------------
 // Message Reaction Remove
-const revokeNotificationsRoleHandler = new MessageReactionRemove.RevokeRoleHandler(config.notificationRoleName, config.notificationRoleMessageId, '✅', logger);
+const revokeNotificationsRoleHandler = new MessageReactionRemove.RevokeRoleHandler(config.notificationRoleName, config.notificationRoleMessageId, '✅', discordClient.extractMessageProps.bind(discordClient), logger);
 
 const messageReactionRemoveEventHandlers = [revokeNotificationsRoleHandler];
 const messageReactionRemoveEventManager = new GenericEventManager('messageReactionRemove', messageReactionRemoveEventHandlers, logger);

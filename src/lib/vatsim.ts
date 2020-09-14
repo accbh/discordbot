@@ -15,7 +15,7 @@ export class VatsimApi {
         });
     }
 
-    async getVATSIMUser(apiInstance: AxiosInstance, userCid: string): Promise<any> {
+    async getVatsimUser(apiInstance: AxiosInstance, userCid: string): Promise<any> {
         return apiInstance.get(`/api/ratings/${userCid}`)
             .then(res => {
                 if (res.status === 200) {

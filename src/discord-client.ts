@@ -1,6 +1,6 @@
-import { Client, ClientUser, PartialTypes, TextChannel } from 'discord.js';
+import { Client, ClientUser, PartialTypes, TextChannel, User, PartialUser, Message } from 'discord.js';
 import { Logger } from './lib/logger';
-import { Hook } from './models';
+import { Hook, ExtractedMessageProps } from './types';
 
 export class DiscordClient {
     constructor(private readonly token: string, partials: PartialTypes[], private readonly hooks: Hook[], private readonly logger: Logger) {
@@ -72,5 +72,18 @@ export class DiscordClient {
 
     getTextChannel(channelId: string): TextChannel {
         return this.client.channels.cache.get(channelId) as TextChannel;
+    }
+
+    /**
+     * Grabs member that reacted to a message and the role that will be assigned to them.
+     * @param message Message that was reacted to.
+     * @param user User that reacted.
+     * @param roleName Name of the role we want to add to the user that reacted.
+     */
+    extractMessageProps(message: Message, user: User | PartialUser, roleName: string): ExtractedMessageProps {
+        return {
+            member: message.guild.member(user.id),
+            role: message.guild.roles.cache.find(x => x.name === roleName)
+        };
     }
 }
