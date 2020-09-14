@@ -9,12 +9,28 @@
     ],
     "dependencies": {
         "axios": "^0.20.0",
+        "bluebird": "^3.7.2",
         "discord.js": "^12.2.0",
         "moment": "^2.27.0"
     },
     "devDependencies": {
+        "@types/bluebird": "^3.5.32",
+        "@types/chai": "^4.2.4",
+        "@types/chai-as-promised": "^7.1.2",
+        "@types/mocha": "^5.2.7",
         "@types/node": "^14.0.24",
+        "@types/sinon": "7.5.0",
+        "@types/sinon-chai": "^3.2.3",
+        "chai": "^4.2.0",
+        "chai-as-promised": "^7.1.1",
+        "mocha": "^6.2.0",
+        "mockdate": "^3.0.2",
+        "nyc": "^14.1.1",
+        "pre-commit": "^1.2.2",
+        "sinon": "^9.0.3",
+        "sinon-chai": "^3.3.0",
         "ts-node": "^8.10.2",
+        "ts-sinon": "^2.0.1",
         "tslint": "6.1.2",
         "tslint-config-security": "1.16.0",
         "typescript": "3.9.7"
@@ -23,10 +39,12 @@
         "start": "npm run start:dev",
         "start:dev": "npx ts-node ./src/index.ts",
         "start:prod": "node ./dist/index.js",
+        "clean": "rm -rf ./dist",
+        "build": "npm run clean && npx tsc",
+        "coverage": "npx nyc npx mocha",
         "lint": "npx tslint --project ./",
         "lint:fix": "npm run lint -- --fix",
-        "clean": "rm -rf ./dist",
-        "build": "npm run clean && npx tsc"
+        "test": "npx mocha"
     },
     "author": "",
     "license": "ISC",
@@ -37,5 +55,29 @@
     "bugs": {
         "url": "https://github.com/accbh/discordbot/issues"
     },
-    "homepage": "https://github.com/accbh/discordbot#readme"
+    "homepage": "https://github.com/accbh/discordbot#readme",
+    "pre-commit": [
+        "lint",
+        "coverage",
+        "build"
+    ],
+    "nyc": {
+        "extension": [
+            ".ts",
+            ".tsx"
+        ],
+        "exclude": [
+            "coverage/**/*",
+            "dist/**/*",
+            "src/index.ts",
+            "src/**/*.test.ts",
+            "test/**/*.ts"
+        ],
+        "reporter": [
+            "lcov",
+            "text",
+            "json"
+        ],
+        "all": true
+    }
 }
