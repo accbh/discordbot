@@ -1,10 +1,11 @@
-import sinon, { stubInterface, StubbedInstance } from 'ts-sinon';
+import sinon, { stubInterface, StubbedInstance, stubObject } from 'ts-sinon';
+import { should } from 'chai';
+import { TextChannel, MessageReaction, User, PartialUser } from 'discord.js';
 
+import * as discordHelpers from '../../../../../src/lib/discord-helpers';
 import { RequestTrainingHandler } from '../../../../../src/events/message-reaction-add';
 import { VatsimApi } from '../../../../../src/lib/vatsim';
-import { TextChannel, MessageReaction, User } from 'discord.js';
 import { Logger } from '../../../../../src/lib/logger';
-import { should } from 'chai';
 
 describe('RequestTrainingHandler', () => {
     const messageId = 'some-message-id';
@@ -25,13 +26,15 @@ describe('RequestTrainingHandler', () => {
     });
 
     beforeEach(() => {
-        sandbox.restore();
-
         getTextChannel = sandbox.stub<[string], TextChannel>();
         vatsimApi = stubInterface<VatsimApi>();
         logger = stubInterface<Logger>();
 
         handler = new RequestTrainingHandler(messageId, emojiName, trainingRequestChannelId, getTextChannel, calendarUrl, vatsimApi, logger);
+    });
+
+    afterEach(() => {
+        sandbox.restore();
     });
 
     describe('constructor', () => {
@@ -166,12 +169,119 @@ describe('RequestTrainingHandler', () => {
     });
 
     describe('handle', () => {
+        const userId = '123';
+        const username = 'some user';
+
         let messageReaction: StubbedInstance<MessageReaction>;
         let user: StubbedInstance<User>;
 
+        let giveTrainingStub: sinon.SinonStub<[User | PartialUser, MessageReaction], Promise<void>>;
+        let resetMessageReactionStub: sinon.SinonStub<[MessageReaction, Logger], Promise<void>>;
+        let applyReactionToMessageStub: sinon.SinonStub<[MessageReaction, string], Promise<void>>;
+
         beforeEach(() => {
             messageReaction = stubInterface<MessageReaction>();
-            user = stubInterface<User>();
+            user = stubObject<User>({
+                id: userId,
+                username
+            } as User);
+
+            giveTrainingStub = sandbox.stub(handler, 'giveTraining').resolves(undefined);
+            resetMessageReactionStub = sandbox.stub(discordHelpers, 'resetMessageReaction').resolves(undefined);
+            applyReactionToMessageStub = sandbox.stub(discordHelpers, 'applyReactionToMessage').resolves(undefined);
         });
+
+        it('should resolve void after swallowing any error thrown by handler.giveTraining()', () => {
+            const error = new Error('Some fake error');
+            giveTrainingStub.rejects(error);
+
+            return handler.handle(messageReaction, user)
+                .then(result => {
+                    giveTrainingStub.should.have.been.calledOnce;
+                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
+
+                    resetMessageReactionStub.should.not.have.been.called;
+                    applyReactionToMessageStub.should.not.have.been.called;
+
+                    logger.info.should.not.have.been.called;
+
+                    logger.error.should.have.been.calledOnce;
+                    logger.error.should.have.been.calledWithExactly(`Training request unsuccessful for ${username} (${userId})`);
+
+                    should().not.exist(result);
+                });
+        });
+
+        it('should resolve void after swallowing any error thrown by resetMessageReaction()', () => {
+            const error = new Error('Some fake error');
+            resetMessageReactionStub.rejects(error);
+
+            return handler.handle(messageReaction, user)
+                .then(result => {
+                    giveTrainingStub.should.have.been.calledOnce;
+                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
+
+                    resetMessageReactionStub.should.have.been.calledOnce;
+                    resetMessageReactionStub.should.have.been.calledWithExactly(messageReaction, logger);
+
+                    applyReactionToMessageStub.should.not.have.been.called;
+
+                    logger.info.should.not.have.been.called;
+
+                    logger.error.should.have.been.calledOnce;
+                    logger.error.should.have.been.calledWithExactly(`Training request unsuccessful for ${username} (${userId})`);
+
+                    should().not.exist(result);
+                });
+        });
+
+        it('should resolve void after swallowing any error thrown by applyReactionToMessage()', () => {
+            const error = new Error('Some fake error');
+            applyReactionToMessageStub.rejects(error);
+
+            return handler.handle(messageReaction, user)
+                .then(result => {
+                    giveTrainingStub.should.have.been.calledOnce;
+                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
+
+                    resetMessageReactionStub.should.have.been.calledOnce;
+                    resetMessageReactionStub.should.have.been.calledWithExactly(messageReaction, logger);
+
+                    applyReactionToMessageStub.should.have.been.calledOnce;
+                    applyReactionToMessageStub.should.have.been.calledWithExactly(messageReaction, emojiName);
+
+                    logger.info.should.not.have.been.called;
+
+                    logger.error.should.have.been.calledOnce;
+                    logger.error.should.have.been.calledWithExactly(`Training request unsuccessful for ${username} (${userId})`);
+
+                    should().not.exist(result);
+                });
+        });
+
+        it('should resolve void after successfully handling the messageReaction', () => {
+            return handler.handle(messageReaction, user)
+                .then(result => {
+                    giveTrainingStub.should.have.been.calledOnce;
+                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
+
+                    resetMessageReactionStub.should.have.been.calledOnce;
+                    resetMessageReactionStub.should.have.been.calledWithExactly(messageReaction, logger);
+
+                    applyReactionToMessageStub.should.have.been.calledOnce;
+                    applyReactionToMessageStub.should.have.been.calledWithExactly(messageReaction, emojiName);
+
+                    logger.info.should.have.been.calledOnce;
+                    logger.info.should.have.been.calledWithExactly(`Training requested by ${username} (${userId})`);
+
+                    logger.error.should.not.have.been.called;
+
+                    should().not.exist(result);
+                });
+        });
+    });
+
+    describe('giveTraining', () => {
+        // skipping this for now as i anticipate big changes here based on the issues/enhancements requested in the repo
     });
 });

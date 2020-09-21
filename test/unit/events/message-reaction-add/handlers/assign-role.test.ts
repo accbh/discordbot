@@ -22,11 +22,13 @@ describe('AssignRoleHandler', () => {
     });
 
     beforeEach(() => {
-        sandbox.restore();
-
         extractMessageProps = sinon.stub<[Message, User, string], ExtractedMessageProps>();
         logger = stubInterface<Logger>();
         handler = new AssignRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
+    });
+
+    afterEach(() => {
+        sandbox.restore();
     });
 
     describe('constructor', () => {
@@ -161,16 +163,17 @@ describe('AssignRoleHandler', () => {
         let member: StubbedInstance<GuildMember>;
         let role: StubbedInstance<Role>;
 
-        let addRoleStub: sinon.SinonStub;
+        let addRoleStub: sinon.SinonStub<[string], Promise<GuildMember>>;
 
         beforeEach(() => {
             messageReaction = stubInterface<MessageReaction>();
             user = stubInterface<User>();
 
-            addRoleStub = sandbox.stub();
+            addRoleStub = sandbox.stub<[string], Promise<GuildMember>>();
             member = stubObject<GuildMember>({ roles: { add: addRoleStub } } as any as GuildMember);
             role = stubInterface<Role>();
 
+            addRoleStub.resolves(member);
             extractMessageProps.returns({ member, role });
         });
 

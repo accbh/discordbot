@@ -16,7 +16,7 @@ describe('DiscordHelpers', () => {
         sandbox = sinon.createSandbox();
     });
 
-    beforeEach(() => {
+    afterEach(() => {
         sandbox.restore();
     });
 
@@ -27,7 +27,7 @@ describe('DiscordHelpers', () => {
         let removeAllReactionsStub: sinon.SinonStub<[], Promise<void>>;
 
         beforeEach(() => {
-            removeAllReactionsStub = sandbox.stub();
+            removeAllReactionsStub = sandbox.stub<[], Promise<void>>();
 
             messageReaction = {
                 message: {

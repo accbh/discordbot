@@ -17,6 +17,7 @@ export class EventManager {
         return [{
             name: 'message',
             listener: async(message: Message) => {
+                console.log(message.content);
                 const messagePrefixMatched = this.messagePrefixRegex.test(message.content);
                 if (!messagePrefixMatched) {
                     return;
@@ -33,7 +34,7 @@ export class EventManager {
                 }
 
                 await Bluebird.map(handlers, handler => handler.handle(command, args, message), { concurrency: 5 })
-                    .catch(error => this.logger.error(error.detailed));
+                    .catch(error => this.logger.error(error.detailed || error.message));
             }
         }];
     }

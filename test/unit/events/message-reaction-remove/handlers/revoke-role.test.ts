@@ -22,11 +22,13 @@ describe('RevokeRoleHandler', () => {
     });
 
     beforeEach(() => {
-        sandbox.restore();
-
         extractMessageProps = sinon.stub<[Message, User, string], ExtractedMessageProps>();
         logger = stubInterface<Logger>();
         handler = new RevokeRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
+    });
+
+    afterEach(() => {
+        sandbox.restore();
     });
 
     describe('constructor', () => {
