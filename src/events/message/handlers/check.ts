@@ -11,11 +11,16 @@ export class CheckHandler implements EventHandler {
     constructor(private readonly allowedCommandUserIds: string[], private readonly vatsimApi: VatsimApi, private readonly logger: Logger) {}
 
     supported(command: string, args: string[], message: Message): boolean {
-        return command === 'check' && !message?.author?.bot && this.allowedCommandUserIds.includes(message.author.id);
+        return command === 'check' && !!message?.author && !message.author.bot && this.allowedCommandUserIds.includes(message.author.id);
     }
 
     async handle(command: string, args: string[], message: Message): Promise<void> {
         const mentionedMember = message.mentions.members.first();
+        if (!mentionedMember) {
+            this.logger.warn('No member was mentioned, unable to handle');
+            return;
+        }
+
         this.logger.verbose(`Checking member: ${mentionedMember.nickname}`);
         
         await Promise.resolve()
@@ -30,6 +35,15 @@ export class CheckHandler implements EventHandler {
                 const name = `${data.name_first} ${data.name_last}`;
                 const atcRatings = ATCRatings[data.rating];
                 const pilotRating = PilotRatings[`P${data.pilotrating}`];
+
+                console.log(`
+                    CID: **${id} (${name})**
+                    vACC: **${vacc}**
+                Division: **${division}**
+                Reg Date: **${reg_date}**
+                Controller Rating: **${atcRatings}**
+                Pilot Rating: **${pilotRating}**
+            `);
 
                 return sendMessageToChannel(
                     mentionedMember.nickname ? mentionedMember.nickname : mentionedMember.user.username,
