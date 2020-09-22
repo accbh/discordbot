@@ -17,7 +17,6 @@ export class EventManager {
         return [{
             name: 'message',
             listener: async(message: Message) => {
-                console.log(message.content);
                 const messagePrefixMatched = this.messagePrefixRegex.test(message.content);
                 if (!messagePrefixMatched) {
                     return;

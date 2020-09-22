@@ -63,7 +63,6 @@ describe('CheckHandler', () => {
 
         it('should return true when all conditions are met', () => {
             const result = handler.supported(command, args, message);
-            console.log(result);
             result.should.be.true;
         });
 

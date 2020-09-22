@@ -36,15 +36,6 @@ export class CheckHandler implements EventHandler {
                 const atcRatings = ATCRatings[data.rating];
                 const pilotRating = PilotRatings[`P${data.pilotrating}`];
 
-                console.log(`
-                    CID: **${id} (${name})**
-                    vACC: **${vacc}**
-                Division: **${division}**
-                Reg Date: **${reg_date}**
-                Controller Rating: **${atcRatings}**
-                Pilot Rating: **${pilotRating}**
-            `);
-
                 return sendMessageToChannel(
                     mentionedMember.nickname ? mentionedMember.nickname : mentionedMember.user.username,
                     `
