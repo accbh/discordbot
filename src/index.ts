@@ -27,7 +27,7 @@ const vatsimApi = new VatsimApi(vatsimBaseUrl, logger);
 
 // -----------------------------------------------------
 // Discord Client
-const discordClient = new DiscordClient(config.discordToken, ['MESSAGE', 'USER', 'REACTION'], [], logger);
+const discordClient = new DiscordClient(config.discordToken, ['MESSAGE', 'USER', 'REACTION'], logger);
 
 // -----------------------------------------------------
 // Guild Member Add

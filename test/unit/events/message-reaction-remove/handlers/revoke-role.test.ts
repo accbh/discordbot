@@ -1,8 +1,8 @@
 import sinon, { StubbedInstance, stubInterface, stubObject } from 'ts-sinon';
-import { should } from 'chai';
 import { Message, MessageReaction, User, GuildMember, Role } from 'discord.js';
+import { should } from 'chai';
 
-import { RevokeRoleHandler } from '../../../../../src/events/message-reaction-remove';
+import { RevokeRoleHandler } from '../../../../../src/events/message-reaction-remove/handlers/revoke-role';
 import { Logger } from '../../../../../src/lib/logger';
 import { ExtractedMessageProps } from '../../../../../src/types';
 
@@ -22,11 +22,13 @@ describe('RevokeRoleHandler', () => {
     });
 
     beforeEach(() => {
-        sandbox.restore();
-
         extractMessageProps = sinon.stub<[Message, User, string], ExtractedMessageProps>();
         logger = stubInterface<Logger>();
         handler = new RevokeRoleHandler(roleName, messageId, emojiName, extractMessageProps, logger);
+    });
+
+    afterEach(() => {
+        sandbox.restore();
     });
 
     describe('constructor', () => {

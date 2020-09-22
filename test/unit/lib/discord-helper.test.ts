@@ -16,7 +16,7 @@ describe('DiscordHelpers', () => {
         sandbox = sinon.createSandbox();
     });
 
-    beforeEach(() => {
+    afterEach(() => {
         sandbox.restore();
     });
 
@@ -27,7 +27,7 @@ describe('DiscordHelpers', () => {
         let removeAllReactionsStub: sinon.SinonStub<[], Promise<void>>;
 
         beforeEach(() => {
-            removeAllReactionsStub = sandbox.stub();
+            removeAllReactionsStub = sandbox.stub<[], Promise<void>>();
 
             messageReaction = {
                 message: {
@@ -179,6 +179,19 @@ describe('DiscordHelpers', () => {
                         username
                     }
                 } as GuildMember;
+            });
+
+            it('should reject an AppError when the user is falsey', () => {
+                member.user = undefined;
+
+                return Promise.resolve()
+                    .then(() => extractUserCidFromGuildMember(member))
+                    .then(() => {
+                        throw new Error('Expected an error to be thrown but got success');
+                    }, err => {
+                        err.should.be.an.instanceOf(AppError);
+                        err.detailed.should.be.equal(`User's VATSIM CID could not be determined.`);
+                    });
             });
 
             it('should reject an AppError when the username is falsey', () => {

@@ -1,11 +1,11 @@
-import { should } from 'chai';
 import sinon from 'ts-sinon';
+import { should } from 'chai';
 import { AppError } from '../../../src/lib/errors';
 
 describe('Errors', () => {
     let sandbox: sinon.SinonSandbox;
 
-    beforeEach(() => {
+    before(() => {
         sandbox = sinon.createSandbox();
     });
 

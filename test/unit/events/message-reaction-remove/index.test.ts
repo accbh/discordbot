@@ -1,5 +1,5 @@
 import * as MessageReactionRemoveModule from '../../../../src/events/message-reaction-remove';
-import { RevokeRoleHandler } from '../../../../src/events/message-reaction-remove/handlers';
+import { RevokeRoleHandler } from '../../../../src/events/message-reaction-remove/handlers/revoke-role';
 
 
 describe('MessageReactionRemoveModule', () => {
