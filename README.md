@@ -1,10 +1,13 @@
 # Bahrain vACC Discord Bot
 
+![Node.js CI](https://github.com/accbh/discordbot/workflows/Node.js%20CI/badge.svg?branch=master)
+
 ## Development and Running Locally
 
 Running the Discord bot requires the creation of a scripts folder with a `start-dev.sh` or `start-dev.bat` in it. This script will then be used to start the app locally using your own custom arguments.
 
 Here is an example:
+
 ```sh
 #!/bin/bash
 
