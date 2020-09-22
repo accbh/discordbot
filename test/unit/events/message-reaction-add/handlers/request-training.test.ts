@@ -1,9 +1,9 @@
 import sinon, { stubInterface, StubbedInstance, stubObject } from 'ts-sinon';
-import { should } from 'chai';
 import { TextChannel, MessageReaction, User, PartialUser } from 'discord.js';
+import { should } from 'chai';
 
 import * as discordHelpers from '../../../../../src/lib/discord-helpers';
-import { RequestTrainingHandler } from '../../../../../src/events/message-reaction-add';
+import { RequestTrainingHandler } from '../../../../../src/events/message-reaction-add/handlers/request-training';
 import { VatsimApi } from '../../../../../src/lib/vatsim';
 import { Logger } from '../../../../../src/lib/logger';
 

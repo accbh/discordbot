@@ -1,8 +1,8 @@
 import sinon, { StubbedInstance, stubInterface, stubObject } from 'ts-sinon';
-import { should } from 'chai';
 import { Message, MessageReaction, User, GuildMember, Role } from 'discord.js';
+import { should } from 'chai';
 
-import { AssignRoleHandler } from '../../../../../src/events/message-reaction-add';
+import { AssignRoleHandler } from '../../../../../src/events/message-reaction-add/handlers/assign-role';
 import { Logger } from '../../../../../src/lib/logger';
 import { ExtractedMessageProps } from '../../../../../src/types';
 

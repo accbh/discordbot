@@ -181,6 +181,19 @@ describe('DiscordHelpers', () => {
                 } as GuildMember;
             });
 
+            it('should reject an AppError when the user is falsey', () => {
+                member.user = undefined;
+
+                return Promise.resolve()
+                    .then(() => extractUserCidFromGuildMember(member))
+                    .then(() => {
+                        throw new Error('Expected an error to be thrown but got success');
+                    }, err => {
+                        err.should.be.an.instanceOf(AppError);
+                        err.detailed.should.be.equal(`User's VATSIM CID could not be determined.`);
+                    });
+            });
+
             it('should reject an AppError when the username is falsey', () => {
                 member.user.username = undefined;
 

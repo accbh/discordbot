@@ -1,9 +1,9 @@
 import sinon, { StubbedInstance, stubInterface } from 'ts-sinon';
+import { Collection, GuildMember, Message,  TextChannel } from 'discord.js';
 import { should } from 'chai';
-import { Collection, GuildMember, Message, MessageEmbed, TextChannel } from 'discord.js';
 
 import * as discordHelpers from '../../../../../src/lib/discord-helpers';
-import { CheckHandler } from '../../../../../src/events/message';
+import { CheckHandler } from '../../../../../src/events/message/handlers/check';
 import { Logger } from '../../../../../src/lib/logger';
 import { VatsimApi } from '../../../../../src/lib/vatsim';
 import { AppError } from '../../../../../src/lib/errors';

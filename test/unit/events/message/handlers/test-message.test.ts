@@ -1,9 +1,9 @@
 import sinon, { StubbedInstance, stubInterface } from 'ts-sinon';
 import { Message, User } from 'discord.js';
-
-import { TestMessageHandler } from '../../../../../src/events/message';
-import { Logger } from '../../../../../src/lib/logger';
 import { should } from 'chai';
+
+import { TestMessageHandler } from '../../../../../src/events/message/handlers/test-message';
+import { Logger } from '../../../../../src/lib/logger';
 
 describe('TestMessageHandler', () => {
     const welcomeMessage = 'hello';

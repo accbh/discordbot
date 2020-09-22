@@ -15,7 +15,7 @@ export const applyReactionToMessage = async function(messageReaction: MessageRea
 };
 
 export const extractUserCidFromGuildMember = function(member: GuildMember): string {
-    const nickname = member?.nickname || member?.user?.username;
+    const nickname = member && (member.nickname || member.user?.username);
         if (!nickname) {
             throw new AppError(`User's VATSIM CID could not be determined.`);
         }

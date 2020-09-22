@@ -5,7 +5,7 @@ import { AppError } from '../../../src/lib/errors';
 describe('Errors', () => {
     let sandbox: sinon.SinonSandbox;
 
-    beforeEach(() => {
+    before(() => {
         sandbox = sinon.createSandbox();
     });
 

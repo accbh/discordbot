@@ -1,10 +1,10 @@
 import sinon, { StubbedInstance, stubInterface, stubObject } from 'ts-sinon';
 import { Channel, Client, ClientUser, GuildMember, Message, PartialTypes, Role, TextChannel, User } from 'discord.js';
+import { should } from 'chai';
 
 import { DiscordClient } from '../../src/discord-client';
 import { Logger } from '../../src/lib/logger';
 import { Hook } from '../../src/types';
-import { should } from 'chai';
 
 describe('DiscordClient', () => {
     const token = 'some-token';
