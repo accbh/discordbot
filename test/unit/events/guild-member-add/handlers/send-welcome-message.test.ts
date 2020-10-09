@@ -1,8 +1,9 @@
-import { SendWelcomeMessageHandler } from '../../../../../src/events/guild-member-add';
-import { Logger } from '../../../../../src/lib/logger';
-import { GuildMember, Message } from 'discord.js';
 import { should } from 'chai';
 import { StubbedInstance, stubInterface } from 'ts-sinon';
+import { GuildMember, Message } from 'discord.js';
+
+import { SendWelcomeMessageHandler } from '../../../../../src/events/guild-member-add/handlers/send-welcome-message';
+import { Logger } from '../../../../../src/lib/logger';
 
 describe('SendWelcomeMessageHandler', () => {
     const welcomeMessage = 'Some welcome message';

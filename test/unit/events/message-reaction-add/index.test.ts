@@ -1,5 +1,6 @@
 import * as MessageReactionAddModule from '../../../../src/events/message-reaction-add';
-import { AssignRoleHandler, RequestTrainingHandler } from '../../../../src/events/message-reaction-add/handlers';
+import { AssignRoleHandler } from '../../../../src/events/message-reaction-add/handlers/assign-role';
+import { RequestTrainingHandler } from '../../../../src/events/message-reaction-add/handlers/request-training';
 
 
 describe('MessageReactionAddModule', () => {

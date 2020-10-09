@@ -3,26 +3,27 @@ import { Logger } from './lib/logger';
 import { Hook, ExtractedMessageProps } from './types';
 
 export class DiscordClient {
-    constructor(private readonly token: string, partials: PartialTypes[], private readonly hooks: Hook[], private readonly logger: Logger) {
+    constructor(private readonly token: string, partials: PartialTypes[], private readonly logger: Logger) {
         this.client = new Client({ partials });
-        this.addHooks(this.hooks);
     }
 
     private client: Client;
-
+    private hooks: Hook[] = [];
+    
     async start(): Promise<this> {
         await this.client.login(this.token);
         this.logger.verbose(`Online as ${this.getRunningAsUser()?.tag}`);
         return this;
     }
 
-    stop(): this {
-        // TODO - disconnect and clean up
+    async stop(): Promise<this> {
+        this.client.destroy();
+        this.hooks = [];
         return this;
     }
 
     addHooks(hooks: Hook[]): this {
-        hooks.forEach(this.addHook.bind(this));
+        hooks.forEach(hook => this.addHook(hook));
         return this;
     }
 
@@ -41,7 +42,7 @@ export class DiscordClient {
     }
 
     removeHooks(hooks: Hook[]): this {
-        hooks.forEach(this.removeHook.bind(this));
+        hooks.forEach(hook => this.removeHook(hook));
         return this;
     }
 

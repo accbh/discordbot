@@ -33,7 +33,7 @@ export class EventManager {
                 }
 
                 await Bluebird.map(handlers, handler => handler.handle(command, args, message), { concurrency: 5 })
-                    .catch(error => this.logger.error(error.detailed));
+                    .catch(error => this.logger.error(error.detailed || error.message));
             }
         }];
     }

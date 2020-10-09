@@ -15,13 +15,15 @@ describe('ConsoleLogger', () => {
     });
 
     beforeEach(() => {
-        sandbox.restore();
-
         MockDate.reset();
         MockDate.set(date);
 
         state = LogLevelValue.INFO;
         logger = new ConsoleLogger(state);
+    });
+
+    afterEach(() => {
+        sandbox.restore();
     });
 
     describe('constructor', () => {
