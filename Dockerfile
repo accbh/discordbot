@@ -1,4 +1,4 @@
-FROM node:current-alpine3.12
+FROM node:14.5.0-alpine
 
 # Create app dir
 RUN mkdir -p /usr/local/app
