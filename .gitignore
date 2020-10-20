@@ -76,9 +76,5 @@ local
 # Bot config
 config.json
 
-# scripts
-scripts/
-
 # Bot private config values
 docker/package*
-docker/run.sh

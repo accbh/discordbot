@@ -1,0 +1,12 @@
+NAME=$(jq -r '.name' ./package.json)
+VERSION=$(jq -r '.version' ./package.json)
+REPO_NAME=accbh
+REGION=eu-west-1
+
+DEV_IDS=167764605957832704,574333819017101312,710430766173126727
+WELCOME_MESSAGE=$'**Welcome to the Bahrain vACC Discord!**\n\n> Naming Convention\nPlease set your Discord nickname to your name \(or variant of your name\) followed by your VATSIM ID. For example: Liam P - 1443704. If you don\'t do this, you will most likely be removed.\nRole will be assigned to you soon by a staff member.\n\nBy joining the server, you agree to the rules listed in \#info as well as the VATSIM COC.'
+NOTIFICATION_ROLE_MESSAGE_ID=754827107904782406
+NOTIFICATION_ROLE_NAME=Notifications
+REQUEST_TRAINING_MESSAGE_ID=754856714242621471
+REQUEST_TRAINING_CHANNEL_ID=754827086577008800
+LOG_LEVEL=verbose
