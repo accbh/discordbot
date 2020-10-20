@@ -14,15 +14,17 @@ export enum ATCRatings {
     S2,
     S3,
     C1,
+    C2,
     C3,
     I1,
+    I2,
     I3,
     SUPERVISOR,
     ADMINISTRATOR
 }
 
 export enum PilotRatings {
-    P0 =  'Basic VATSIM Pilot',
+    P0 = 'Basic VATSIM Pilot',
     P1 = 'Private Pilot License (PPL)',
     P2 = 'Instrument Rating (IR)',
     P3 = 'Commerical Multi-Engine License (CMEL)',

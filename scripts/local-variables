@@ -1,0 +1,6 @@
+source ./scripts/variables
+
+LOCAL_VARIABLE_FILE_PATH=./local/variables
+if [ -f $LOCAL_VARIABLE_FILE_PATH ]; then
+    source $LOCAL_VARIABLE_FILE_PATH
+fi
