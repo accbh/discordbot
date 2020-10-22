@@ -18,7 +18,9 @@ describe('DiscordHelpers', () => {
 
     before(() => {
         sandbox = sinon.createSandbox();
+    });
 
+    beforeEach(() => {
         fakeDefaultRetry = async (func: () => any | Promise<any>): Promise<any> => {
             return await func();
         };
