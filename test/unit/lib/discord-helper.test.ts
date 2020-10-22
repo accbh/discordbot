@@ -14,8 +14,14 @@ import { VatsimApi } from '../../../src/lib/vatsim';
 describe('DiscordHelpers', () => {
     let sandbox: sinon.SinonSandbox;
 
+    let fakeDefaultRetry: (func: () => any | Promise<any>) => Promise<any>;
+
     before(() => {
         sandbox = sinon.createSandbox();
+
+        fakeDefaultRetry = async (func: () => any | Promise<any>): Promise<any> => {
+            return await func();
+        };
     });
 
     afterEach(() => {
@@ -26,6 +32,7 @@ describe('DiscordHelpers', () => {
         let messageReaction: MessageReaction;
 
         let removeAllReactionsStub: sinon.SinonStub<[], Promise<void>>;
+        let defaultRetryStub: sinon.SinonStub<[() => any | Promise<any>], Promise<any>>;
 
         beforeEach(() => {
             removeAllReactionsStub = sandbox.stub<[], Promise<void>>();
@@ -37,6 +44,8 @@ describe('DiscordHelpers', () => {
                     }
                 }
             } as any as MessageReaction;
+
+            defaultRetryStub = sandbox.stub(factory, 'defaultRetry').callsFake(fakeDefaultRetry);
         });
 
         it('should reject with any error thrown by messageReaction.message.reactions.removeAll()', () => {
@@ -49,6 +58,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     removeAllReactionsStub.should.have.been.calledOnce;
                     removeAllReactionsStub.should.have.been.calledWithExactly();
 
@@ -61,6 +72,8 @@ describe('DiscordHelpers', () => {
 
             return resetMessageReaction(messageReaction)
                 .then(result => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     removeAllReactionsStub.should.have.been.calledOnce;
                     removeAllReactionsStub.should.have.been.calledWithExactly();
 
@@ -73,17 +86,10 @@ describe('DiscordHelpers', () => {
         const emojiName = 'some-emoji-name';
         let messageReaction: MessageReaction;
 
-        let sandbox: sinon.SinonSandbox;
-
         let reactStub: sinon.SinonStub<[string], Promise<void>>;
-
-        before(() => {
-            sandbox = sinon.createSandbox();
-        });
+        let defaultRetryStub: sinon.SinonStub<[() => any | Promise<any>], Promise<any>>;
 
         beforeEach(() => {
-            sandbox.restore();
-
             reactStub = sandbox.stub();
 
             messageReaction = {
@@ -91,6 +97,8 @@ describe('DiscordHelpers', () => {
                     react: reactStub
                 }
             } as any as MessageReaction;
+
+            defaultRetryStub = sandbox.stub(factory, 'defaultRetry').callsFake(fakeDefaultRetry);
         });
 
         it('should reject with any error thrown by messageReaction.message.react()', () => {
@@ -101,6 +109,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     reactStub.should.have.been.calledOnce;
                     reactStub.should.have.been.calledWithExactly(emojiName);
 
@@ -111,6 +121,8 @@ describe('DiscordHelpers', () => {
         it('should resolve void after applying the reaction to the message', () => {
             return applyReactionToMessage(messageReaction, emojiName)
                 .then(result => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     reactStub.should.have.been.calledOnce;
                     reactStub.should.have.been.calledWithExactly(emojiName);
 
@@ -238,11 +250,15 @@ describe('DiscordHelpers', () => {
         let vatsimApi: StubbedInstance<VatsimApi>;
         let apiInstance: StubbedInstance<AxiosInstance>;
 
+        let defaultRetryStub: sinon.SinonStub<[() => any | Promise<any>], Promise<any>>;
+
         beforeEach(() => {
             vatsimApi = stubInterface<VatsimApi>();
             apiInstance = stubInterface<AxiosInstance>();
 
             vatsimApi.getApiInstance.resolves(apiInstance);
+
+            defaultRetryStub = sandbox.stub(factory, 'defaultRetry').callsFake(fakeDefaultRetry);
         });
 
         it('should reject with any error thrown by vatsimApi.getApiInstance()', () => {
@@ -253,6 +269,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     vatsimApi.getApiInstance.should.have.been.calledOnce;
                     vatsimApi.getApiInstance.should.have.been.calledWithExactly();
 
@@ -270,6 +288,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     vatsimApi.getApiInstance.should.have.been.calledOnce;
                     vatsimApi.getApiInstance.should.have.been.calledWithExactly();
 
@@ -286,6 +306,8 @@ describe('DiscordHelpers', () => {
 
             return getVatsimUser(vatsimApi, cid)
                 .then(result => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     vatsimApi.getApiInstance.should.have.been.calledOnce;
                     vatsimApi.getApiInstance.should.have.been.calledWithExactly();
 
@@ -320,6 +342,8 @@ describe('DiscordHelpers', () => {
         let embeddedMessage: StubbedInstance<MessageEmbed>;
         let constructEmbeddedMessageStub: sinon.SinonStub<[string, string, string], MessageEmbed>;
 
+        let defaultRetryStub: sinon.SinonStub<[() => any | Promise<any>], Promise<any>>;
+
         beforeEach(() => {
             user = stubInterface<User>();
             user.avatarURL.returns(avatarUrl);
@@ -327,6 +351,8 @@ describe('DiscordHelpers', () => {
             embeddedMessage = stubInterface<MessageEmbed>();
 
             constructEmbeddedMessageStub = sandbox.stub(discordHelpers, 'constructEmbeddedMessage').returns(embeddedMessage);
+
+            defaultRetryStub = sandbox.stub(factory, 'defaultRetry').callsFake(fakeDefaultRetry);
         });
 
         it('should reject with any error thrown by user.avatarUrl()', () => {
@@ -337,6 +363,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     user.avatarURL.should.have.been.calledOnce;
                     user.avatarURL.should.have.been.calledWithExactly();
 
@@ -355,6 +383,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     user.avatarURL.should.have.been.calledOnce;
                     user.avatarURL.should.have.been.calledWithExactly();
 
@@ -375,6 +405,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     user.avatarURL.should.have.been.calledOnce;
                     user.avatarURL.should.have.been.calledWithExactly();
 
@@ -391,6 +423,8 @@ describe('DiscordHelpers', () => {
         it('should resolve void after executing as expected', () => {
             return sendMessageToUser(header, message, user)
                 .then(result => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     user.avatarURL.should.have.been.calledOnce;
                     user.avatarURL.should.have.been.calledWithExactly();
 
@@ -415,11 +449,15 @@ describe('DiscordHelpers', () => {
         let embeddedMessage: StubbedInstance<MessageEmbed>;
         let constructEmbeddedMessageStub: sinon.SinonStub<[string, string, string], MessageEmbed>;
 
+        let defaultRetryStub: sinon.SinonStub<[() => any | Promise<any>], Promise<any>>;
+
         beforeEach(() => {
             channel = stubInterface<TextChannel>();
 
             embeddedMessage = stubInterface<MessageEmbed>();
             constructEmbeddedMessageStub = sandbox.stub(discordHelpers, 'constructEmbeddedMessage').returns(embeddedMessage);
+
+            defaultRetryStub = sandbox.stub(factory, 'defaultRetry').callsFake(fakeDefaultRetry);
         });
 
         it('should reject with any error thrown by constructEmbeddedMessage()', () => {
@@ -430,6 +468,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     constructEmbeddedMessageStub.should.have.been.calledOnce;
                     constructEmbeddedMessageStub.should.have.been.calledWithExactly(header, message, avatarUrl);
 
@@ -447,6 +487,8 @@ describe('DiscordHelpers', () => {
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     constructEmbeddedMessageStub.should.have.been.calledOnce;
                     constructEmbeddedMessageStub.should.have.been.calledWithExactly(header, message, avatarUrl);
 
@@ -460,6 +502,8 @@ describe('DiscordHelpers', () => {
         it('should resolve void after executing as expected', () => {
             return sendMessageToChannel(header, message, channel, avatarUrl)
                 .then(result => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
                     constructEmbeddedMessageStub.should.have.been.calledOnce;
                     constructEmbeddedMessageStub.should.have.been.calledWithExactly(header, message, avatarUrl);
 
@@ -489,26 +533,37 @@ describe('DiscordHelpers', () => {
 
             user = stubInterface<User>();
 
-            defaultRetryStub = sandbox.stub(factory, 'defaultRetry');
+            defaultRetryStub = sandbox.stub(factory, 'defaultRetry').callsFake(fakeDefaultRetry);
         });
 
-        it('should reject with any error thrown by defaultRetry', () => {
+        it('should reject with any error thrown by messageReaction.users.remove', () => {
             const error = new Error('Some fake error');
-            defaultRetryStub.rejects(error);
+            removeStub.rejects(error);
 
             return removeUserFromMessageReaction(messageReaction, user)
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
-                    removeStub.should.not.have.been.called;
-
                     defaultRetryStub.should.have.been.calledOnce;
-                    defaultRetryStub.getCall(0).callArg(0);
 
                     removeStub.should.have.been.calledOnce;
                     removeStub.should.have.been.calledWithExactly(user);
 
                     err.should.be.equal(error);
+                });
+        });
+
+        it('should resolve void on success', () => {
+            removeStub.resolves(messageReaction);
+
+            return removeUserFromMessageReaction(messageReaction, user)
+                .then(result => {
+                    defaultRetryStub.should.have.been.calledOnce;
+
+                    removeStub.should.have.been.calledOnce;
+                    removeStub.should.have.been.calledWithExactly(user);
+
+                    should().not.exist(result);
                 });
         });
     });

@@ -54,9 +54,10 @@ const messageReactionAddEventManager = new GenericEventManager('messageReactionA
 
 // -----------------------------------------------------
 // Message Reaction Remove
+const cancelTrainingRequestHandler = new MessageReactionRemove.CancelTrainingRequestHandler(config.requestTrainingMessageId, '🗒️');
 const revokeNotificationsRoleHandler = new MessageReactionRemove.RevokeRoleHandler(config.notificationRoleName, config.notificationRoleMessageId, '✅', discordClient.extractMessageProps.bind(discordClient), logger);
 
-const messageReactionRemoveEventHandlers = [revokeNotificationsRoleHandler];
+const messageReactionRemoveEventHandlers = [cancelTrainingRequestHandler, revokeNotificationsRoleHandler];
 const messageReactionRemoveEventManager = new GenericEventManager('messageReactionRemove', messageReactionRemoveEventHandlers, logger);
 
 // -----------------------------------------------------
