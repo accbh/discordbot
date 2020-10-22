@@ -215,11 +215,11 @@ describe('RequestTrainingHandler', () => {
 
             return handler.handle(messageReaction, user)
                 .then(result => {
-                    giveTrainingStub.should.have.been.calledOnce;
-                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
-
                     removeUserFromMessageReactionStub.should.have.been.calledOnce;
                     removeUserFromMessageReactionStub.should.have.been.calledWithExactly(messageReaction, user);
+
+                    giveTrainingStub.should.have.been.calledOnce;
+                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
 
                     logger.info.should.not.have.been.called;
 
@@ -233,11 +233,11 @@ describe('RequestTrainingHandler', () => {
         it('should resolve void after successfully handling the messageReaction', () => {
             return handler.handle(messageReaction, user)
                 .then(result => {
-                    giveTrainingStub.should.have.been.calledOnce;
-                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
-
                     removeUserFromMessageReactionStub.should.have.been.calledOnce;
                     removeUserFromMessageReactionStub.should.have.been.calledWithExactly(messageReaction, user);
+
+                    giveTrainingStub.should.have.been.calledOnce;
+                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
 
                     logger.info.should.have.been.calledOnce;
                     logger.info.should.have.been.calledWithExactly(`Training requested by ${username} (${userId})`);
