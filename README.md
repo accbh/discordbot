@@ -21,7 +21,7 @@ The default variables for being able to run locally have been added to `./script
 
 ```sh
 mkdir ./local
-echo `#!/bin/bash\n\nDISCORD_BOT={your token goes here}\n` > ./local/variables
+echo $'#!/bin/bash\n\nDISCORD_TOKEN={your token goes here}\n' > ./local/variables
 chmod +x ./local/variables
 ```
 

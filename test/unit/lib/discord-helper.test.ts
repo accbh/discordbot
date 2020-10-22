@@ -1,11 +1,13 @@
+import * as discordHelpers from '../../../src/lib/discord-helpers';
+
 import sinon, { stubInterface, StubbedInstance } from 'ts-sinon';
-import { MessageReaction, GuildMember, MessageEmbed, User, TextChannel } from 'discord.js';
+
+import { MessageReaction, GuildMember, MessageEmbed, User, TextChannel, UserResolvable } from 'discord.js';
 import { should } from 'chai';
 import { AxiosInstance } from 'axios';
 
-import * as discordHelpers from '../../../src/lib/discord-helpers';
-import { resetMessageReaction, applyReactionToMessage, extractUserCidFromGuildMember, getVatsimUser, constructEmbeddedMessage, sendMessageToUser, sendMessageToChannel } from '../../../src/lib/discord-helpers';
-import { Logger } from '../../../src/lib/logger';
+import { resetMessageReaction, applyReactionToMessage, extractUserCidFromGuildMember, getVatsimUser, constructEmbeddedMessage, sendMessageToUser, sendMessageToChannel, removeUserFromMessageReaction } from '../../../src/lib/discord-helpers';
+import { factory } from '../../../src/lib/helpers';
 import { AppError } from '../../../src/lib/errors';
 import { VatsimApi } from '../../../src/lib/vatsim';
 
@@ -22,7 +24,6 @@ describe('DiscordHelpers', () => {
 
     describe('resetMessageReaction', () => {
         let messageReaction: MessageReaction;
-        let logger: StubbedInstance<Logger>;
 
         let removeAllReactionsStub: sinon.SinonStub<[], Promise<void>>;
 
@@ -36,28 +37,29 @@ describe('DiscordHelpers', () => {
                     }
                 }
             } as any as MessageReaction;
-            logger = stubInterface<Logger>();
         });
 
-        it('should resolve void after consuming any error thrown by messageReaction.message.reactions.removeAll()', () => {
+        it('should reject with any error thrown by messageReaction.message.reactions.removeAll()', () => {
             // Not sure why we are consuming this error, but i suggest we introduce Bluebird to retry this many times, before throwing the error
 
             const error = new Error('Some fake error');
             removeAllReactionsStub.rejects(error);
 
-            return resetMessageReaction(messageReaction, logger)
-                .then(result => {
+            return resetMessageReaction(messageReaction)
+                .then(() => {
+                    throw new Error('Expected an error to be thrown but got success');
+                }, err => {
                     removeAllReactionsStub.should.have.been.calledOnce;
                     removeAllReactionsStub.should.have.been.calledWithExactly();
 
-                    should().not.exist(result);
+                    err.should.be.equal(error);
                 });
         });
 
         it('should resolve void after successfully removing all reactions', () => {
             removeAllReactionsStub.resolves();
 
-            return resetMessageReaction(messageReaction, logger)
+            return resetMessageReaction(messageReaction)
                 .then(result => {
                     removeAllReactionsStub.should.have.been.calledOnce;
                     removeAllReactionsStub.should.have.been.calledWithExactly();
@@ -312,7 +314,7 @@ describe('DiscordHelpers', () => {
         const header = 'some header';
         const message = 'some message';
         const avatarUrl = 'some-avatar-url';
-        
+
         let user: StubbedInstance<User>;
 
         let embeddedMessage: StubbedInstance<MessageEmbed>;
@@ -407,7 +409,7 @@ describe('DiscordHelpers', () => {
         const header = 'some header';
         const message = 'some message';
         const avatarUrl = 'some-avatar-url';
-        
+
         let channel: StubbedInstance<TextChannel>;
 
         let embeddedMessage: StubbedInstance<MessageEmbed>;
@@ -465,6 +467,48 @@ describe('DiscordHelpers', () => {
                     channel.send.should.have.been.calledWithExactly(embeddedMessage);
 
                     should().not.exist(result);
+                });
+        });
+    });
+
+    describe('removeUserFromMessageReaction', () => {
+        let messageReaction: MessageReaction;
+        let removeStub: sinon.SinonStub<[UserResolvable], MessageReaction>;
+
+        let user: StubbedInstance<User>;
+
+        let defaultRetryStub: sinon.SinonStub<[() => any | Promise<any>], Promise<any>>;
+
+        beforeEach(() => {
+            removeStub = sandbox.stub<[UserResolvable], MessageReaction>();
+            messageReaction = {
+                users: {
+                    remove: removeStub
+                }
+            } as any as MessageReaction;
+
+            user = stubInterface<User>();
+
+            defaultRetryStub = sandbox.stub(factory, 'defaultRetry');
+        });
+
+        it('should reject with any error thrown by defaultRetry', () => {
+            const error = new Error('Some fake error');
+            defaultRetryStub.rejects(error);
+
+            return removeUserFromMessageReaction(messageReaction, user)
+                .then(() => {
+                    throw new Error('Expected an error to be thrown but got success');
+                }, err => {
+                    removeStub.should.not.have.been.called;
+
+                    defaultRetryStub.should.have.been.calledOnce;
+                    defaultRetryStub.getCall(0).callArg(0);
+
+                    removeStub.should.have.been.calledOnce;
+                    removeStub.should.have.been.calledWithExactly(user);
+
+                    err.should.be.equal(error);
                 });
         });
     });
