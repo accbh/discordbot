@@ -11,7 +11,7 @@ export class EventManager {
     getHooks(): Hook[] {
         return [{
             name: this.hookName,
-            listener: async(...args: any[]) => {
+            listener: async (...args: any[]) => {
                 const handlers = this.handlers.filter(handler => handler.supported.call(handler, ...args));
 
                 if (!handlers.length) {

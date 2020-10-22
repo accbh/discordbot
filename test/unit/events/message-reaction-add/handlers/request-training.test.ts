@@ -16,7 +16,7 @@ describe('RequestTrainingHandler', () => {
     let getTextChannel: sinon.SinonStub<[string], TextChannel>;
     let vatsimApi: StubbedInstance<VatsimApi>;
     let logger: StubbedInstance<Logger>;
-    
+
     let handler: RequestTrainingHandler;
 
     let sandbox: sinon.SinonSandbox;
@@ -57,7 +57,7 @@ describe('RequestTrainingHandler', () => {
             const calendarUrl = '?test=true&date=';
 
             handler = new RequestTrainingHandler(messageId, emojiName, trainingRequestChannelId, getTextChannel, calendarUrl, vatsimApi, logger);
-            
+
             handler.should.be.deep.equal({
                 messageId,
                 emojiName,
@@ -115,7 +115,7 @@ describe('RequestTrainingHandler', () => {
             should().not.exist(user);
 
             return Promise.resolve()
-            .then(() => handler.supported(messageReaction, user))
+                .then(() => handler.supported(messageReaction, user))
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
@@ -129,7 +129,7 @@ describe('RequestTrainingHandler', () => {
             should().not.exist(messageReaction.message);
 
             return Promise.resolve()
-            .then(() => handler.supported(messageReaction, user))
+                .then(() => handler.supported(messageReaction, user))
                 .then(() => {
                     throw new Error('Expected an error to be thrown but got success');
                 }, err => {
@@ -176,8 +176,7 @@ describe('RequestTrainingHandler', () => {
         let user: StubbedInstance<User>;
 
         let giveTrainingStub: sinon.SinonStub<[User | PartialUser, MessageReaction], Promise<void>>;
-        let resetMessageReactionStub: sinon.SinonStub<[MessageReaction, Logger], Promise<void>>;
-        let applyReactionToMessageStub: sinon.SinonStub<[MessageReaction, string], Promise<void>>;
+        let removeUserFromMessageReactionStub: sinon.SinonStub<[MessageReaction, User], Promise<void>>;
 
         beforeEach(() => {
             messageReaction = stubInterface<MessageReaction>();
@@ -187,8 +186,27 @@ describe('RequestTrainingHandler', () => {
             } as User);
 
             giveTrainingStub = sandbox.stub(handler, 'giveTraining').resolves(undefined);
-            resetMessageReactionStub = sandbox.stub(discordHelpers, 'resetMessageReaction').resolves(undefined);
-            applyReactionToMessageStub = sandbox.stub(discordHelpers, 'applyReactionToMessage').resolves(undefined);
+            removeUserFromMessageReactionStub = sandbox.stub(discordHelpers, 'removeUserFromMessageReaction').resolves(undefined);
+        });
+
+        it('should reject with any error thrown by removeUserFromMessageReaction()', () => {
+            const error = new Error('Some fake error');
+            removeUserFromMessageReactionStub.rejects(error);
+
+            return handler.handle(messageReaction, user)
+                .then(result => {
+                    removeUserFromMessageReactionStub.should.have.been.calledOnce;
+                    removeUserFromMessageReactionStub.should.have.been.calledWithExactly(messageReaction, user);
+
+                    giveTrainingStub.should.not.have.been.called;
+
+                    logger.info.should.not.have.been.called;
+
+                    logger.error.should.have.been.calledOnce;
+                    logger.error.should.have.been.calledWithExactly(`Training request unsuccessful for ${username} (${userId})`);
+
+                    should().not.exist(result);
+                });
         });
 
         it('should resolve void after swallowing any error thrown by handler.giveTraining()', () => {
@@ -197,58 +215,11 @@ describe('RequestTrainingHandler', () => {
 
             return handler.handle(messageReaction, user)
                 .then(result => {
+                    removeUserFromMessageReactionStub.should.have.been.calledOnce;
+                    removeUserFromMessageReactionStub.should.have.been.calledWithExactly(messageReaction, user);
+
                     giveTrainingStub.should.have.been.calledOnce;
                     giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
-
-                    resetMessageReactionStub.should.not.have.been.called;
-                    applyReactionToMessageStub.should.not.have.been.called;
-
-                    logger.info.should.not.have.been.called;
-
-                    logger.error.should.have.been.calledOnce;
-                    logger.error.should.have.been.calledWithExactly(`Training request unsuccessful for ${username} (${userId})`);
-
-                    should().not.exist(result);
-                });
-        });
-
-        it('should resolve void after swallowing any error thrown by resetMessageReaction()', () => {
-            const error = new Error('Some fake error');
-            resetMessageReactionStub.rejects(error);
-
-            return handler.handle(messageReaction, user)
-                .then(result => {
-                    giveTrainingStub.should.have.been.calledOnce;
-                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
-
-                    resetMessageReactionStub.should.have.been.calledOnce;
-                    resetMessageReactionStub.should.have.been.calledWithExactly(messageReaction, logger);
-
-                    applyReactionToMessageStub.should.not.have.been.called;
-
-                    logger.info.should.not.have.been.called;
-
-                    logger.error.should.have.been.calledOnce;
-                    logger.error.should.have.been.calledWithExactly(`Training request unsuccessful for ${username} (${userId})`);
-
-                    should().not.exist(result);
-                });
-        });
-
-        it('should resolve void after swallowing any error thrown by applyReactionToMessage()', () => {
-            const error = new Error('Some fake error');
-            applyReactionToMessageStub.rejects(error);
-
-            return handler.handle(messageReaction, user)
-                .then(result => {
-                    giveTrainingStub.should.have.been.calledOnce;
-                    giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
-
-                    resetMessageReactionStub.should.have.been.calledOnce;
-                    resetMessageReactionStub.should.have.been.calledWithExactly(messageReaction, logger);
-
-                    applyReactionToMessageStub.should.have.been.calledOnce;
-                    applyReactionToMessageStub.should.have.been.calledWithExactly(messageReaction, emojiName);
 
                     logger.info.should.not.have.been.called;
 
@@ -262,14 +233,11 @@ describe('RequestTrainingHandler', () => {
         it('should resolve void after successfully handling the messageReaction', () => {
             return handler.handle(messageReaction, user)
                 .then(result => {
+                    removeUserFromMessageReactionStub.should.have.been.calledOnce;
+                    removeUserFromMessageReactionStub.should.have.been.calledWithExactly(messageReaction, user);
+
                     giveTrainingStub.should.have.been.calledOnce;
                     giveTrainingStub.should.have.been.calledWithExactly(user, messageReaction);
-
-                    resetMessageReactionStub.should.have.been.calledOnce;
-                    resetMessageReactionStub.should.have.been.calledWithExactly(messageReaction, logger);
-
-                    applyReactionToMessageStub.should.have.been.calledOnce;
-                    applyReactionToMessageStub.should.have.been.calledWithExactly(messageReaction, emojiName);
 
                     logger.info.should.have.been.calledOnce;
                     logger.info.should.have.been.calledWithExactly(`Training requested by ${username} (${userId})`);

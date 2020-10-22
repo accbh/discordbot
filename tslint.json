@@ -1,7 +1,5 @@
 {
-    "extends": 
-        "tslint-config-security"
-    ,
+    "extends": "tslint-config-security",
     "rules": {
         "class-name": false,
         "comment-format": [
@@ -23,12 +21,15 @@
             "check-open-brace",
             "check-whitespace"
         ],
-        "quotemark": [ 
-            true, 
-            "single", 
+        "quotemark": [
+            true,
+            "single",
             "avoid-escape"
         ],
-        "semicolon": [true, "always"],
+        "semicolon": [
+            true,
+            "always"
+        ],
         "triple-equals": [
             true,
             "allow-null-check"
@@ -55,7 +56,14 @@
             "check-separator",
             "check-type"
         ],
-        "space-before-function-paren": [true, "never"],
+        "space-before-function-paren": [
+            true,
+            {
+                "anonymous": "always",
+                "named": "never",
+                "asyncArrow": "always"
+            }
+        ],
         "eofline": true
     }
 }

@@ -16,7 +16,7 @@ export class EventManager {
     getHooks(): Hook[] {
         return [{
             name: 'message',
-            listener: async(message: Message) => {
+            listener: async (message: Message) => {
                 const messagePrefixMatched = this.messagePrefixRegex.test(message.content);
                 if (!messagePrefixMatched) {
                     return;
